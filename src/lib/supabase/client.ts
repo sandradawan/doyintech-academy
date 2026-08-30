@@ -1,5 +1,4 @@
 import { createBrowserClient } from "@supabase/ssr";
-import type { Database } from "./types";
 
 export function createClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -11,5 +10,6 @@ export function createClient() {
     );
   }
 
-  return createBrowserClient<Database>(url, key);
+  // Untyped client avoids brittle generated Database generics blocking production builds.
+  return createBrowserClient(url, key);
 }

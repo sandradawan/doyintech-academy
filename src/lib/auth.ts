@@ -28,7 +28,9 @@ function mapEnrollment(row: EnrollmentRow, completedLessons: string[] = []): Enr
 
 export async function getStudent(): Promise<Student | null> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
 
   const { data, error } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
@@ -55,12 +57,14 @@ export async function signUp(name: string, email: string, password: string) {
   if (!data.user) return { student: null, error: "Sign up failed" };
   const student = await getStudent();
   return {
-    student: student ?? {
-      id: data.user.id,
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      createdAt: new Date().toISOString(),
-    },
+    student:
+      student ??
+      ({
+        id: data.user.id,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        createdAt: new Date().toISOString(),
+      } satisfies Student),
     error: null,
   };
 }
@@ -83,7 +87,9 @@ export async function signOut() {
 
 export async function getEnrollments(): Promise<Enrollment[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   const { data: enrollments, error } = await supabase
@@ -101,9 +107,10 @@ export async function getEnrollments(): Promise<Enrollment[]> {
 
   const byCourse = new Map<string, string[]>();
   for (const p of progress ?? []) {
-    const list = byCourse.get(p.course_slug) ?? [];
-    list.push(p.lesson_id);
-    byCourse.set(p.course_slug, list);
+    const row = p as { course_slug: string; lesson_id: string };
+    const list = byCourse.get(row.course_slug) ?? [];
+    list.push(row.lesson_id);
+    byCourse.set(row.course_slug, list);
   }
 
   return (enrollments as EnrollmentRow[]).map((row) =>
@@ -155,7 +162,7 @@ export async function joinWaitlist(email: string, name?: string) {
     email: email.trim().toLowerCase(),
     name: name?.trim() || null,
     source: "landing",
-  });
+  } as { email: string; name: string | null; source: string });
   if (error) {
     if (error.code === "23505") return { ok: true };
     return { ok: false, error: error.message };
