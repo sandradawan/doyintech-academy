@@ -8,9 +8,9 @@ export function CourseCard({ course }: { course: Course }) {
 
   return (
     <Link href={`/courses/${course.slug}`} className="group block h-full">
-      <article className="flex h-full flex-col overflow-hidden rounded-xl bg-surface shadow-[0_0_0_1px_rgba(255,255,255,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.14)]">
+      <article className="flex h-full flex-col overflow-hidden rounded-xl bg-surface shadow-[0_0_0_1px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgba(37,99,235,0.25)]">
         <div className={`relative aspect-video bg-gradient-to-br ${course.accent}`}>
-          <div className="absolute inset-0 bg-bg/30" />
+          <div className="absolute inset-0 bg-black/15" />
           <span className="absolute top-3 left-3 rounded-full bg-surface-2/90 px-2.5 py-0.5 text-xs font-medium text-fg">
             {course.level}
           </span>

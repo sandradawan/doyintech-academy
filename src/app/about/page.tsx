@@ -15,7 +15,7 @@ export default function AboutPage() {
           review pull requests at DoyinTech.
         </p>
       </div>
-      <section className="mt-12 rounded-xl bg-surface p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
+      <section className="mt-12 rounded-xl bg-surface p-6 shadow-[0_0_0_1px_rgba(15,23,42,0.08)]">
         <h2 className="font-display text-xl font-medium text-fg">Faculty</h2>
         <p className="mt-3 text-sm leading-relaxed text-muted">
           Led by Silas Doyin Jonathan, founder of DoyinTech.

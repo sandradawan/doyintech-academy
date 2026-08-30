@@ -23,7 +23,7 @@ export function WaitlistForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-xl border border-border bg-surface p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
+      className="rounded-xl border border-border bg-surface p-6 shadow-[0_0_0_1px_rgba(15,23,42,0.06)]"
     >
       <p className="text-xs font-medium tracking-widest text-cyan uppercase">First cohort</p>
       <h3 className="mt-2 font-display text-xl font-medium tracking-tight">Join the waitlist</h3>
@@ -43,7 +43,7 @@ export function WaitlistForm() {
       <button type="submit" className="mt-4 inline-flex h-11 items-center justify-center rounded-md bg-primary px-5 text-sm font-medium text-primary-fg hover:bg-primary/90">
         Join waitlist
       </button>
-      {message ? <p className={`mt-3 text-sm ${ok ? "text-cyan" : "text-red-400"}`}>{message}</p> : null}
+      {message ? <p className={`mt-3 text-sm ${ok ? "text-cyan" : "text-red-500"}`}>{message}</p> : null}
     </form>
   );
 }
