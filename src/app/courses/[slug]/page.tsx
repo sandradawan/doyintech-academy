@@ -8,6 +8,7 @@ import { getCourse } from "@/lib/courses/catalog";
 import type { LessonKind } from "@/lib/courses/types";
 import { courseLessonCount } from "@/lib/courses/types";
 import { enrollInCourse, getEnrollment, getStudent, markLessonComplete, type Enrollment, type Student } from "@/lib/auth";
+import { QuizPanel } from "@/components/courses/quiz-panel";
 
 const kindIcon: Record<LessonKind, typeof Clapperboard> = {
   video: Clapperboard,
@@ -127,7 +128,13 @@ export default function CourseDetailPage() {
               </div>
             ))}
           </div>
+          {enrollment ? (
+            <div className="mt-10">
+              <QuizPanel courseSlug={slug} />
+            </div>
+          ) : null}
         </div>
+
         <aside className="h-fit rounded-xl bg-surface p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.08)] lg:sticky lg:top-24">
           <h2 className="font-display text-lg font-medium">You will leave able to</h2>
           <ul className="mt-4 space-y-3">
