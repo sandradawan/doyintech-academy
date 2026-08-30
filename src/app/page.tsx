@@ -11,7 +11,7 @@ export default function HomePage() {
   return (
     <main>
       <section className="relative isolate overflow-hidden border-b border-border">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-bg to-cyan/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-bg to-orange/10" />
         <div className="relative mx-auto max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
           <p className="text-xs font-medium tracking-widest text-cyan uppercase">DoyinTech school</p>
           <h1 className="mt-4 max-w-2xl font-display text-4xl font-medium tracking-tight text-fg sm:text-5xl lg:text-6xl">
@@ -46,7 +46,7 @@ export default function HomePage() {
             { icon: Code2, title: "Practice", body: "In-browser exercises. You write the code." },
             { icon: Award, title: "Certify", body: "Pass at 70%. Print a named certificate." },
           ].map((step, i) => (
-            <article key={step.title} className="rounded-xl bg-surface p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
+            <article key={step.title} className="rounded-xl bg-surface p-5 shadow-[0_0_0_1px_rgba(15,23,42,0.08)]">
               <div className="flex items-center justify-between">
                 <step.icon className="size-5 text-cyan" />
                 <span className="font-mono text-xs text-subtle">0{i + 1}</span>
@@ -58,7 +58,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="border-t border-border bg-surface/50">
+      <section className="border-t border-border bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -88,7 +88,7 @@ export default function HomePage() {
         <Link href="/certificates" className="mt-8 inline-flex h-11 items-center rounded-md border border-border px-4 text-sm font-medium hover:bg-surface-2">How certification works</Link>
       </section>
 
-      <section className="border-t border-border bg-surface/40">
+      <section className="border-t border-border bg-surface">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:items-center">
           <div>
             <p className="text-xs font-medium tracking-widest text-cyan uppercase">Launch</p>
