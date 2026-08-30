@@ -83,14 +83,15 @@ export function getEnrollment(courseSlug: string): Enrollment | undefined {
   return getEnrollments().find((e) => e.courseSlug === courseSlug);
 }
 
-export function markLessonComplete(courseSlug: string, lessonId: string) {
+export function markLessonComplete(courseSlug: string, lessonId: string): boolean {
   const list = getEnrollments();
   const enrollment = list.find((e) => e.courseSlug === courseSlug);
-  if (!enrollment) return;
+  if (!enrollment) return false;
   if (!enrollment.completedLessons.includes(lessonId)) {
     enrollment.completedLessons.push(lessonId);
     saveEnrollments(list);
   }
+  return true;
 }
 
 export function completeQuiz(courseSlug: string, score: number): Enrollment | undefined {
