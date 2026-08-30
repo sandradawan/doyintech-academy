@@ -1,0 +1,5 @@
+-- See full migration in repo after clone. Primary objects:
+-- profiles, enrollments, lesson_progress, waitlist
+-- RPCs: enroll_in_course, complete_lesson, submit_course_quiz, verify_certificate
+-- RLS enabled on all tables
+-- Run the complete SQL from local file supabase/migrations/20260330000000_init.sql in Supabase SQL Editor
