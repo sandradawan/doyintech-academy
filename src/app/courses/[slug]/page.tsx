@@ -14,6 +14,7 @@ import {
   type Enrollment, type Student,
 } from "@/lib/auth";
 import { QuizPanel } from "@/components/courses/quiz-panel";
+import { LessonContentPanel } from "@/components/courses/lesson-content-panel";
 import {
   getActiveModuleIndex, getNextIncompleteLesson, isCourseLessonsComplete,
   isModuleComplete, isModuleUnlocked, moduleProgress,
@@ -49,9 +50,7 @@ export default function CourseDetailPage() {
     );
   }
 
-  // Capture narrowed Course for handlers (TS does not retain control-flow in nested functions).
   const resolved = course;
-
   const lessons = courseLessonCount(resolved);
   const activeIndex = getActiveModuleIndex(resolved, enrollment);
   const nextLesson = getNextIncompleteLesson(resolved, enrollment);
@@ -179,6 +178,7 @@ export default function CourseDetailPage() {
                               <p className="text-xs text-subtle">{kindLabel[lesson.kind]} · {lesson.durationMin} min</p>
                             </div>
                             <p className="mt-1 text-sm leading-relaxed text-muted">{lesson.summary}</p>
+                            {enrollment && unlocked ? <LessonContentPanel lessonId={lesson.id} /> : null}
                             {enrollment && unlocked ? (
                               <button type="button" onClick={() => handleComplete(index, lesson.id)} disabled={!!done} className={`mt-2 text-xs font-medium ${done ? "text-cyan" : "text-primary hover:underline"}`}>
                                 {done ? "Completed" : "Mark complete"}
