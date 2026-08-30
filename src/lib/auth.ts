@@ -106,11 +106,10 @@ export async function getEnrollments(): Promise<Enrollment[]> {
     .eq("user_id", user.id);
 
   const byCourse = new Map<string, string[]>();
-  for (const p of progress ?? []) {
-    const row = p as { course_slug: string; lesson_id: string };
-    const list = byCourse.get(row.course_slug) ?? [];
-    list.push(row.lesson_id);
-    byCourse.set(row.course_slug, list);
+  for (const p of (progress ?? []) as { course_slug: string; lesson_id: string }[]) {
+    const list = byCourse.get(p.course_slug) ?? [];
+    list.push(p.lesson_id);
+    byCourse.set(p.course_slug, list);
   }
 
   return (enrollments as EnrollmentRow[]).map((row) =>
@@ -158,11 +157,12 @@ export function progressPercent(enrollment: Enrollment | undefined, totalLessons
 
 export async function joinWaitlist(email: string, name?: string) {
   const supabase = createClient();
-  const { error } = await supabase.from("waitlist").insert({
+  const payload = {
     email: email.trim().toLowerCase(),
     name: name?.trim() || null,
     source: "landing",
-  } as { email: string; name: string | null; source: string });
+  };
+  const { error } = await supabase.from("waitlist").insert(payload);
   if (error) {
     if (error.code === "23505") return { ok: true };
     return { ok: false, error: error.message };
