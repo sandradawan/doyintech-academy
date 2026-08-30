@@ -1,0 +1,18 @@
+name: Content queue check
+on:
+  push:
+    paths:
+      - "content/**"
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate queue JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('content/queue.json','utf8')); console.log('queue ok')"
+      - name: Status
+        run: node scripts/content-status.mjs
