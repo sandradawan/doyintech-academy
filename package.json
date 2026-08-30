@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "content:status": "node scripts/content-status.mjs",
+    "content:publish": "node scripts/publish-lesson.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
