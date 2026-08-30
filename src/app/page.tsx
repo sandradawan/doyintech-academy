@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, Clapperboard, Code2, Award, Check } from "lucide-react";
 import { CourseCard } from "@/components/courses/course-card";
+import { WaitlistForm } from "@/components/home/waitlist-form";
 import { catalogStats, featuredCourses } from "@/lib/courses/catalog";
 
 export default function HomePage() {
@@ -85,6 +86,19 @@ export default function HomePage() {
           ))}
         </ul>
         <Link href="/certificates" className="mt-8 inline-flex h-11 items-center rounded-md border border-border px-4 text-sm font-medium hover:bg-surface-2">How certification works</Link>
+      </section>
+
+      <section className="border-t border-border bg-surface/40">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:items-center">
+          <div>
+            <p className="text-xs font-medium tracking-widest text-cyan uppercase">Launch</p>
+            <h2 className="mt-3 font-display text-3xl font-medium tracking-tight">First cohort is forming.</h2>
+            <p className="mt-4 text-base leading-relaxed text-muted">
+              Self-serve courses are open now. Live cohort seats, graded projects, and faculty office hours open for waitlisted students first.
+            </p>
+          </div>
+          <WaitlistForm />
+        </div>
       </section>
     </main>
   );
