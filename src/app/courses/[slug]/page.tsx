@@ -49,10 +49,13 @@ export default function CourseDetailPage() {
     );
   }
 
-  const lessons = courseLessonCount(course);
-  const activeIndex = getActiveModuleIndex(course, enrollment);
-  const nextLesson = getNextIncompleteLesson(course, enrollment);
-  const allLessonsDone = isCourseLessonsComplete(course, enrollment);
+  // Capture narrowed Course for handlers (TS does not retain control-flow in nested functions).
+  const resolved = course;
+
+  const lessons = courseLessonCount(resolved);
+  const activeIndex = getActiveModuleIndex(resolved, enrollment);
+  const nextLesson = getNextIncompleteLesson(resolved, enrollment);
+  const allLessonsDone = isCourseLessonsComplete(resolved, enrollment);
 
   function handleEnroll() {
     if (!getStudent()) {
@@ -63,14 +66,14 @@ export default function CourseDetailPage() {
   }
 
   function handleComplete(moduleIndex: number, lessonId: string) {
-    if (!enrollment || !isModuleUnlocked(course, enrollment, moduleIndex)) return;
-    const wasComplete = isModuleComplete(course.modules[moduleIndex], enrollment);
+    if (!enrollment || !isModuleUnlocked(resolved, enrollment, moduleIndex)) return;
+    const wasComplete = isModuleComplete(resolved.modules[moduleIndex], enrollment);
     markLessonComplete(slug, lessonId);
     const updated = getEnrollment(slug);
     setEnrollment(updated);
-    if (updated && !wasComplete && isModuleComplete(course.modules[moduleIndex], updated)) {
-      const next = course.modules[moduleIndex + 1];
-      if (next && isModuleUnlocked(course, updated, moduleIndex + 1)) {
+    if (updated && !wasComplete && isModuleComplete(resolved.modules[moduleIndex], updated)) {
+      const next = resolved.modules[moduleIndex + 1];
+      if (next && isModuleUnlocked(resolved, updated, moduleIndex + 1)) {
         setJustUnlocked(next.title);
         setTimeout(() => setJustUnlocked(null), 4000);
       }
