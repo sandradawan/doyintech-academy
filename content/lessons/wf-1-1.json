@@ -1,0 +1,64 @@
+{
+  "id": "wf-1-1",
+  "courseSlug": "web-foundations",
+  "title": "Browsers, servers, and requests",
+  "kind": "video",
+  "durationMin": 8,
+  "goals": [
+    "Describe the path from typing a URL to seeing a page",
+    "Distinguish browser, DNS, and web server roles",
+    "Read a simple HTTP status code"
+  ],
+  "bodyMd": "## What happens when you hit Enter?\n\nWhen you type `https://doyintech.vercel.app` and press Enter, your computer does not magically \"know\" the page. It follows a pipeline:\n\n1. **DNS** — resolve the host name to an IP address.\n2. **TCP/TLS** — open a secure connection to that IP.\n3. **HTTP request** — ask for a specific resource (`GET /`).\n4. **Server response** — HTML (and later CSS/JS) comes back with a **status code**.\n5. **Render** — the browser turns markup into pixels.\n\n### Status codes you will see often\n\n| Code | Meaning |\n|------|--------|\n| 200 | OK — body is the resource |\n| 301 / 302 | Redirect — go somewhere else |\n| 404 | Not found |\n| 500 | Server error |\n\n### Why this matters for developers\n\nEvery bug that looks like \"the page is blank\" is somewhere in this chain: wrong URL, DNS, TLS, status code, or the HTML itself. Learning the chain makes debugging predictable.",
+  "codeBlocks": [
+    {
+      "lang": "bash",
+      "title": "Inspect response headers",
+      "code": "curl -I https://example.com\n# Look for: HTTP/2 200, content-type, server"
+    }
+  ],
+  "practice": {
+    "prompt": "Run `curl -I` against any public site. Write down the status line and content-type.",
+    "starter": "curl -I https://",
+    "solution": "You should see a line like HTTP/2 200 and a content-type such as text/html."
+  },
+  "quiz": [
+    {
+      "question": "What does DNS primarily do?",
+      "choices": [
+        "Compress images for the browser",
+        "Map a host name to an IP address",
+        "Execute JavaScript on the server",
+        "Style the page with CSS"
+      ],
+      "answerIndex": 1,
+      "explain": "DNS is the phone book of the internet: names → addresses."
+    },
+    {
+      "question": "A 404 status means:",
+      "choices": [
+        "The server is offline",
+        "The resource was not found at that path",
+        "You must log in",
+        "The SSL certificate is invalid"
+      ],
+      "answerIndex": 1,
+      "explain": "404 is \"not found\" for that URL path — the server itself may still be healthy."
+    }
+  ],
+  "video": {
+    "script": "Welcome to Web Foundations. In the next few minutes we will walk the exact path your browser takes when you open a website — from the address bar, through DNS, to the HTML that lands on your screen. No mysticism: just a clear request and response. By the end you will be able to explain a 200, a 404, and why curl is a developer's flashlight.",
+    "storyboard": [
+      { "t": "0:00", "visual": "Dark UI, orange accent cursor in address bar", "line": "Hook: what happens when you press Enter?" },
+      { "t": "1:30", "visual": "Simple DNS diagram host → IP", "line": "DNS resolution" },
+      { "t": "3:30", "visual": "HTTP request/response cards", "line": "Request line and status codes" },
+      { "t": "6:00", "visual": "Terminal curl -I demo", "line": "Practice with curl" },
+      { "t": "7:30", "visual": "Lesson goals checklist", "line": "Recap and next lesson" }
+    ],
+    "grokVideoPrompt": "16:9 cinematic tech lesson, dark charcoal background, single orange/gold accent lighting, clean sans-serif on-screen labels for DNS, HTTP, 200, 404, smooth camera moves, precise confident tone, no cartoon style, duration about 30 seconds teaser style for Web Foundations lesson 1",
+    "url": null,
+    "status": "script_ready"
+  },
+  "publishedAt": "2026-08-30T17:00:00.000Z",
+  "version": 1
+}
