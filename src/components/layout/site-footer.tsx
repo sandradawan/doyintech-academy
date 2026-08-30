@@ -19,6 +19,7 @@ export function SiteFooter() {
             <li><Link href="/certificates" className="text-muted hover:text-fg">Certificates</Link></li>
             <li><Link href="/dashboard" className="text-muted hover:text-fg">Student dashboard</Link></li>
             <li><Link href="/about" className="text-muted hover:text-fg">About the academy</Link></li>
+            <li><Link href="/admin" className="text-muted hover:text-fg">Faculty admin</Link></li>
           </ul>
         </div>
         <div>
