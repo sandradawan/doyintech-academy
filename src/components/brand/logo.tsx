@@ -2,9 +2,10 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * Logo mark aligned with DoyinTech (https://doyintech.vercel.app):
- * orange circular badge + white geometric monogram.
- * Academy variant: open book / learning arc inside the same orange disc.
+ * Doyintech Academy logo
+ * — Keeps the DoyinTech orange disc from https://doyintech.vercel.app
+ * — Primary mark is a bold Academy "A" (learning / achievement)
+ * — Small open-book stroke under the A ties education to the brand
  */
 export function LogoMark({ className }: { className?: string }) {
   return (
@@ -22,12 +23,27 @@ export function LogoMark({ className }: { className?: string }) {
         </linearGradient>
       </defs>
       <circle cx="20" cy="20" r="18" fill="url(#dt-orange)" />
-      <circle cx="20" cy="20" r="18" fill="none" stroke="#FFFFFF" strokeOpacity="0.18" strokeWidth="1" />
+      <circle cx="20" cy="20" r="18" fill="none" stroke="#FFFFFF" strokeOpacity="0.2" strokeWidth="1" />
       <path
         fill="#FFFFFF"
-        d="M14 11.5h7.2c4.35 0 7.05 2.55 7.05 6.5v4c0 3.95-2.7 6.5-7.05 6.5H14V11.5zm3.35 3.15v10.7h3.85c2.55 0 4-1.45 4-3.85v-3c0-2.4-1.45-3.85-4-3.85H17.35z"
+        d="M20 9.2L11.2 28.2h3.55l1.7-4.15h7.1l1.7 4.15H29L20 9.2zm0 5.15l2.55 6.25h-5.1L20 14.35z"
       />
-      <circle cx="29.5" cy="12" r="1.6" fill="#FFFFFF" fillOpacity="0.95" />
+      <path
+        d="M13.5 31.2c2.1-1.35 4.2-2 6.5-2s4.4.65 6.5 2"
+        fill="none"
+        stroke="#FFFFFF"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeOpacity="0.9"
+      />
+      <path
+        d="M20 29.2v2.6"
+        fill="none"
+        stroke="#FFFFFF"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeOpacity="0.85"
+      />
     </svg>
   );
 }
@@ -38,7 +54,14 @@ export function LogoMarkSimple({ className }: { className?: string }) {
       <circle cx="16" cy="16" r="15" fill="#F97316" />
       <path
         fill="#FFFFFF"
-        d="M11 9h5.6c3.5 0 5.6 2 5.6 5.1v3.8c0 3.1-2.1 5.1-5.6 5.1H11V9zm2.7 2.5v9h3c2 0 3.15-1.15 3.15-3.05v-2.9c0-1.9-1.15-3.05-3.15-3.05h-3z"
+        d="M16 6.8L9.2 22.2h2.85l1.35-3.3h5.2l1.35 3.3H22.8L16 6.8zm0 4.2l2 4.95h-4L16 11z"
+      />
+      <path
+        d="M11 24.6c1.6-1 3.2-1.5 5-1.5s3.4.5 5 1.5"
+        fill="none"
+        stroke="#FFFFFF"
+        strokeWidth="1.4"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -56,7 +79,7 @@ export function Logo({ className }: { className?: string }) {
         <span className="font-display text-[15px] font-semibold tracking-tight text-fg">
           Doyin<span className="text-primary">Tech</span>
         </span>
-        <span className="text-[11px] font-semibold tracking-[0.16em] text-orange uppercase">
+        <span className="text-[11px] font-semibold tracking-[0.16em] text-orange-500 uppercase">
           Academy
         </span>
       </span>
