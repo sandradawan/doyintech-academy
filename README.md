@@ -10,6 +10,8 @@ A school from [DoyinTech](https://doyintech.vercel.app).
 - Student accounts (on-device)
 - Dashboard with progress
 - Certificates after 70% quiz
+- Admin CMS at `/admin` (PIN: `doyin2026`)
+- Homepage waitlist for first cohort
 
 ## Stack
 
