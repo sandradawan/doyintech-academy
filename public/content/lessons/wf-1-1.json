@@ -1,0 +1,39 @@
+{
+  "id": "wf-1-1",
+  "courseSlug": "web-foundations",
+  "title": "Browsers, servers, and requests",
+  "kind": "video",
+  "durationMin": 8,
+  "goals": [
+    "Describe the path from typing a URL to seeing a page",
+    "Distinguish browser, DNS, and web server roles",
+    "Read a simple HTTP status code"
+  ],
+  "bodyMd": "## What happens when you hit Enter?\n\nWhen you type a URL and press Enter, the browser follows DNS, TCP/TLS, HTTP request, response, and render. Status codes 200, 404, and 500 are the ones you will meet first.",
+  "codeBlocks": [
+    {
+      "lang": "bash",
+      "title": "Inspect response headers",
+      "code": "curl -I https://example.com"
+    }
+  ],
+  "practice": {
+    "prompt": "Run curl -I against any public site and note the status line.",
+    "starter": "curl -I https://",
+    "solution": "HTTP/2 200 and a content-type such as text/html."
+  },
+  "quiz": [
+    {
+      "question": "What does DNS primarily do?",
+      "choices": ["Compress images", "Map a host name to an IP address", "Execute JavaScript", "Style the page"],
+      "answerIndex": 1
+    }
+  ],
+  "video": {
+    "script": "Walk the path from address bar to HTML on screen.",
+    "url": null,
+    "status": "script_ready"
+  },
+  "publishedAt": "2026-08-30T17:00:00.000Z",
+  "version": 1
+}

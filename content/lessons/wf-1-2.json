@@ -1,0 +1,69 @@
+{
+  "id": "wf-1-2",
+  "courseSlug": "web-foundations",
+  "title": "Your first HTML document",
+  "kind": "interactive",
+  "durationMin": 12,
+  "goals": [
+    "Write a valid HTML5 document from DOCTYPE to closing html",
+    "Use h1, p, and a correctly",
+    "Open a local HTML file in the browser and see the result"
+  ],
+  "bodyMd": "## A page is just a text file\n\nHTML is not a programming language. It is a **markup** language: you label parts of a document so the browser knows what they mean.\n\nEvery modern page starts with the same skeleton.\n\n### The minimum valid page\n\n```html\n<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Hello Doyintech Academy</title>\n  </head>\n  <body>\n    <h1>Hello, web</h1>\n    <p>This is my first page.</p>\n  </body>\n</html>\n```\n\n### What each part does\n\n| Piece | Role |\n|-------|------|\n| `<!DOCTYPE html>` | Tells the browser to use HTML5 rules |\n| `<html lang=\"en\">` | Root element; `lang` helps screen readers and SEO |\n| `<head>` | Metadata — title, charset, viewport — not visible as page text |\n| `<body>` | Everything the user sees |\n| `<h1>` | Main heading (one primary h1 per page is a good habit) |\n| `<p>` | Paragraph |\n\n### Charset and viewport\n\n- **charset utf-8** — so Nigerian names, currency symbols, and emoji render correctly.\n- **viewport** — so the page does not look zoomed-out on phones.\n\n### Links\n\n```html\n<a href=\"https://doyintech.vercel.app\">Visit DoyinTech</a>\n```\n\n`href` is the destination. The text between the tags is what the user clicks.\n\n### Try it offline\n\n1. Create a folder `first-page`.\n2. Save the skeleton as `index.html`.\n3. Double-click the file (or drag it into Chrome).\n4. You should see your heading — no server required yet.",
+  "codeBlocks": [
+    {
+      "lang": "html",
+      "title": "index.html — full starter",
+      "code": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n    <title>Hello Doyintech Academy</title>\n  </head>\n  <body>\n    <h1>Hello, web</h1>\n    <p>This is my first page.</p>\n    <p>\n      <a href=\"https://doyintech.vercel.app\">Visit DoyinTech</a>\n    </p>\n  </body>\n</html>"
+    }
+  ],
+  "practice": {
+    "prompt": "Create index.html with your name in the h1, one paragraph about why you are learning to code, and a link to any site you use daily. Open it in the browser.",
+    "starter": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <title></title>\n  </head>\n  <body>\n    <!-- your content -->\n  </body>\n</html>",
+    "solution": "A valid page with title, h1 with your name, at least one p, and one a[href]."
+  },
+  "quiz": [
+    {
+      "question": "Where does visible page content belong?",
+      "choices": ["Inside <head>", "Inside <body>", "Only in CSS files", "In the DOCTYPE"],
+      "answerIndex": 1,
+      "explain": "The body holds what users see. Head is for metadata."
+    },
+    {
+      "question": "Why set charset to utf-8?",
+      "choices": [
+        "It makes the site faster",
+        "So a wide range of characters render correctly",
+        "It is required for JavaScript",
+        "It replaces the need for a title"
+      ],
+      "answerIndex": 1,
+      "explain": "UTF-8 supports most written languages and symbols."
+    },
+    {
+      "question": "What does the viewport meta tag help with?",
+      "choices": [
+        "Database connections",
+        "Mobile layout scale",
+        "Password hashing",
+        "DNS lookup"
+      ],
+      "answerIndex": 1,
+      "explain": "Viewport tells mobile browsers how to size the layout viewport."
+    }
+  ],
+  "video": {
+    "script": "In this lesson you will write your first real HTML file — not a screenshot, a file you own. We will walk the skeleton: doctype, html, head, body. Then you will add a heading, a paragraph, and a link, and open it in the browser. By the end you will know that a website starts as plain text with clear labels.",
+    "storyboard": [
+      { "t": "0:00", "visual": "Empty editor, dark theme, orange cursor", "line": "A page is a text file" },
+      { "t": "2:00", "visual": "Skeleton HTML highlighted section by section", "line": "DOCTYPE through body" },
+      { "t": "5:00", "visual": "Browser showing Hello web", "line": "Open the file locally" },
+      { "t": "8:00", "visual": "Add link and refresh", "line": "Practice assignment" }
+    ],
+    "grokVideoPrompt": "16:9 cinematic coding lesson, dark charcoal editor UI, orange accent caret, HTML skeleton on screen with clean sans-serif labels for DOCTYPE head body, high contrast, precise motion, DoyinTech Academy style, no cartoon",
+    "url": null,
+    "status": "script_ready"
+  },
+  "publishedAt": "2026-08-30T17:50:00.000Z",
+  "version": 1
+}
