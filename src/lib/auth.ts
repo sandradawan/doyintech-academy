@@ -48,37 +48,51 @@ export async function getStudent(): Promise<Student | null> {
 }
 
 export async function signUp(name: string, email: string, password: string) {
-  const supabase = createClient();
-  const { data, error } = await supabase.auth.signUp({
-    email: email.trim().toLowerCase(),
-    password,
-    options: { data: { full_name: name.trim() } },
-  });
-  if (error) return { student: null, error: error.message };
-  if (!data.user) return { student: null, error: "Sign up failed" };
-  const student = await getStudent();
-  return {
-    student:
-      student ??
-      ({
-        id: data.user.id,
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        createdAt: new Date().toISOString(),
-      } satisfies Student),
-    error: null,
-  };
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password,
+      options: { data: { full_name: name.trim() } },
+    });
+    if (error) return { student: null, error: error.message };
+    if (!data.user) return { student: null, error: "Sign up failed" };
+    const student = await getStudent();
+    return {
+      student:
+        student ??
+        ({
+          id: data.user.id,
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          createdAt: new Date().toISOString(),
+        } satisfies Student),
+      error: null,
+    };
+  } catch (e) {
+    return {
+      student: null,
+      error: e instanceof Error ? e.message : "Sign up failed",
+    };
+  }
 }
 
 export async function signIn(email: string, password: string) {
-  const supabase = createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email: email.trim().toLowerCase(),
-    password,
-  });
-  if (error) return { student: null, error: error.message };
-  const student = await getStudent();
-  return { student, error: student ? null : "Profile not found" };
+  try {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    });
+    if (error) return { student: null, error: error.message };
+    const student = await getStudent();
+    return { student, error: student ? null : "Could not load your profile. Try again." };
+  } catch (e) {
+    return {
+      student: null,
+      error: e instanceof Error ? e.message : "Sign in failed",
+    };
+  }
 }
 
 export async function signOut() {
@@ -151,7 +165,7 @@ export async function completeQuiz(courseSlug: string, score: number) {
     });
     if (!error && data) return getEnrollment(courseSlug);
   } catch {
-    /* fall through to direct update */
+    /* fall through */
   }
 
   const {
@@ -174,12 +188,7 @@ export async function completeQuiz(courseSlug: string, score: number) {
     }
   }
 
-  await supabase
-    .from("enrollments")
-    .update(patch)
-    .eq("user_id", user.id)
-    .eq("course_slug", courseSlug);
-
+  await supabase.from("enrollments").update(patch).eq("user_id", user.id).eq("course_slug", courseSlug);
   return getEnrollment(courseSlug);
 }
 
