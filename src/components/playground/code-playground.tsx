@@ -8,6 +8,11 @@ import {
   PLAYGROUND_LANGUAGES,
   getPlaygroundLanguage,
 } from "@/lib/playground/languages";
+import {
+  runJavaScriptInBrowser,
+  runPythonInBrowser,
+  transpileTypeScript,
+} from "@/lib/playground/browser-runner";
 
 const Monaco = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
@@ -91,18 +96,42 @@ export function CodePlayground() {
     setStderr("");
 
     try {
-      if (lang.runtime === "browser") {
+      if (lang.id === "html") {
         runBrowserHtml(code);
         return;
       }
 
       setHtmlPreview("");
+
+      if (lang.id === "javascript") {
+        const { stdout, stderr } = runJavaScriptInBrowser(code);
+        setStdout(stdout || (!stderr ? "(no output)" : ""));
+        setStderr(stderr);
+        return;
+      }
+
+      if (lang.id === "typescript") {
+        const { js } = await transpileTypeScript(code);
+        const { stdout, stderr } = runJavaScriptInBrowser(js);
+        setStdout(stdout || (!stderr ? "(no output)" : ""));
+        setStderr(stderr);
+        return;
+      }
+
+      if (lang.runtime === "pyodide") {
+        setStdout("Loading Python runtime (first time only)…");
+        const { stdout, stderr } = await runPythonInBrowser(code);
+        setStdout(stdout || (!stderr ? "(no output)" : ""));
+        setStderr(stderr);
+        return;
+      }
+
       const res = await fetch("/api/playground/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          language: lang.pistonLanguage,
-          version: lang.pistonVersion || "*",
+          language: lang.remoteLanguage || lang.id,
+          version: lang.remoteVersion || "*",
           code,
           stdin,
         }),
@@ -243,8 +272,7 @@ export function CodePlayground() {
       <p className="text-xs text-muted">
         Monaco editor · <kbd className="rounded border border-border px-1">Ctrl</kbd>/
         <kbd className="rounded border border-border px-1">⌘</kbd>+
-        <kbd className="rounded border border-border px-1">Enter</kbd> to run · Find, multi-cursor,
-        brackets, and syntax highlighting enabled
+        <kbd className="rounded border border-border px-1">Enter</kbd> to run · HTML/JS/TS/Python run in-browser
       </p>
 
       <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-2">
@@ -298,7 +326,7 @@ export function CodePlayground() {
               }}
             />
           </div>
-          {lang.runtime === "piston" ? (
+          {lang.runtime === "remote" ? (
             <div className="border-t border-border p-3">
               <label className="text-[11px] font-semibold tracking-wide text-muted uppercase">
                 Standard input (optional)
@@ -318,11 +346,11 @@ export function CodePlayground() {
           <div className="flex items-center gap-2 border-b border-border px-3 py-2">
             <Terminal className="size-3.5 text-primary" />
             <p className="text-xs font-semibold tracking-wide text-muted uppercase">
-              {lang.runtime === "browser" ? "Result (preview)" : "Output"}
+              {lang.id === "html" ? "Result (preview)" : "Output"}
             </p>
           </div>
 
-          {lang.runtime === "browser" && htmlPreview ? (
+          {lang.id === "html" && htmlPreview ? (
             <iframe
               title="Playground preview"
               sandbox="allow-scripts"
