@@ -2,7 +2,8 @@
   "id": "wf-1-2",
   "title": "Your first HTML document",
   "goals": ["Write a valid HTML5 document", "Use headings and paragraphs", "Add a link"],
-  "body": "## Your first HTML document\n\nStart every page with a doctype and an `html` root.\n\n```html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n  <title>My first page</title>\n</head>\n<body>\n  <h1>Hello, Academy</h1>\n  <p>This is a paragraph of text.</p>\n  <a href=\"https://doyintechacademy.vercel.app\">Learn more</a>\n</body>\n</html>\n```\n\n### Rules of thumb\n- One `<h1>` per page for the main title.\n- Nest lists and sections logically.\n- Always set `lang` on `<html>` for accessibility.\n\n### Exercise\nCreate `index.html` with your name as the `<h1>` and a short bio paragraph.",
-  "videoScript": "We write a complete HTML5 document from scratch and open it in the browser.",
+  "body": "## Your first HTML document\n\nStart every page with a doctype and an `html` root.\n\n```html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>My first page</title>\n</head>\n<body>\n  <h1>Hello, Academy</h1>\n  <p>This is a paragraph.</p>\n</body>\n</html>\n```",
+  "youtubeId": "pQN-pnXPaVg",
+  "thumbnail": "https://i.ytimg.com/vi/pQN-pnXPaVg/hqdefault.jpg",
   "quiz": [{ "q": "What does the doctype do?", "choices": ["Loads CSS", "Tells the browser to use standards mode", "Runs JavaScript"], "answer": 1 }]
 }

@@ -2,7 +2,9 @@
   "id": "wf-1-1",
   "title": "How the web works",
   "goals": ["Explain client vs server", "Name the three core web languages", "Open DevTools"],
-  "body": "## How the web works\n\nEvery page you visit is a conversation:\n\n1. **Browser** asks a **server** for a resource.\n2. The server responds with **HTML** (structure), often **CSS** (look), and **JavaScript** (behavior).\n3. The browser paints pixels on your screen.\n\n### Mental model\n\nThink of HTML as the skeleton, CSS as the clothes, and JavaScript as the muscles.\n\n```html\n<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <title>Hello Doyintech</title>\n  </head>\n  <body>\n    <h1>Ship work you can show</h1>\n  </body>\n</html>\n```\n\n### Practice\nOpen any website, right-click → Inspect. Find the `<body>` tag. That is the live document tree.",
-  "videoScript": "Welcome. In this lesson we map how a browser fetches HTML and why CSS and JavaScript arrive as separate resources.",
+  "body": "## How the web works\n\nEvery page you visit is a conversation:\n\n1. **Browser** asks a **server** for a resource.\n2. The server responds with **HTML** (structure), often **CSS** (look), and **JavaScript** (behavior).\n3. The browser paints pixels on your screen.\n\n### Mental model\n\nThink of HTML as the skeleton, CSS as the clothes, and JavaScript as the muscles.\n\n```html\n<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <title>Hello Doyintech</title>\n  </head>\n  <body>\n    <h1>Ship work you can show</h1>\n  </body>\n</html>\n```\n\n### Practice\nOpen any website, right-click → Inspect. Find the `<body>` tag.",
+  "videoScript": "Welcome. In this lesson we map how a browser fetches HTML.",
+  "youtubeId": "UB1O30fX-d8",
+  "thumbnail": "https://i.ytimg.com/vi/UB1O30fX-d8/hqdefault.jpg",
   "quiz": [{ "q": "Which language describes structure?", "choices": ["CSS", "HTML", "JavaScript"], "answer": 1 }]
 }
