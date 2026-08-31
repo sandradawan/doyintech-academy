@@ -37,8 +37,24 @@ export default function CourseDetailPage() {
   const [justUnlocked, setJustUnlocked] = useState<string | null>(null);
 
   useEffect(() => {
-    setStudent(getStudent());
-    setEnrollment(getEnrollment(slug));
+    let cancelled = false;
+    (async () => {
+      try {
+        const s = await getStudent();
+        const e = await getEnrollment(slug);
+        if (cancelled) return;
+        setStudent(s);
+        setEnrollment(e);
+      } catch {
+        if (!cancelled) {
+          setStudent(null);
+          setEnrollment(undefined);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   if (!course) {
@@ -56,19 +72,25 @@ export default function CourseDetailPage() {
   const nextLesson = getNextIncompleteLesson(resolved, enrollment);
   const allLessonsDone = isCourseLessonsComplete(resolved, enrollment);
 
-  function handleEnroll() {
-    if (!getStudent()) {
+  async function handleEnroll() {
+    const s = await getStudent();
+    if (!s) {
       router.push(`/login?next=/courses/${slug}`);
       return;
     }
-    setEnrollment(enrollInCourse(slug));
+    try {
+      const e = await enrollInCourse(slug);
+      setEnrollment(e);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  function handleComplete(moduleIndex: number, lessonId: string) {
+  async function handleComplete(moduleIndex: number, lessonId: string) {
     if (!enrollment || !isModuleUnlocked(resolved, enrollment, moduleIndex)) return;
     const wasComplete = isModuleComplete(resolved.modules[moduleIndex], enrollment);
-    markLessonComplete(slug, lessonId);
-    const updated = getEnrollment(slug);
+    await markLessonComplete(slug, lessonId);
+    const updated = await getEnrollment(slug);
     setEnrollment(updated);
     if (updated && !wasComplete && isModuleComplete(resolved.modules[moduleIndex], updated)) {
       const next = resolved.modules[moduleIndex + 1];
