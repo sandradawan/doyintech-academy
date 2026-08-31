@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Award,
+  Code2,
   GraduationCap,
   Home,
   LayoutDashboard,
@@ -16,6 +17,7 @@ import type { Student } from "@/lib/auth";
 
 const mainNav = [
   { href: "/dashboard", label: "My learning", icon: LayoutDashboard },
+  { href: "/dashboard/playground", label: "Playground", icon: Code2 },
   { href: "/courses", label: "Browse courses", icon: Search },
   { href: "/certificates", label: "Certificates", icon: Award },
   { href: "/", label: "Home", icon: Home },
@@ -43,7 +45,7 @@ export function AppSidebar({
         {mainNav.map((item) => {
           const active =
             item.href === "/dashboard"
-              ? pathname.startsWith("/dashboard")
+              ? pathname === "/dashboard"
               : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
           return (
@@ -80,9 +82,9 @@ export function AppSidebar({
               <button
                 type="button"
                 onClick={onSignOut}
-                className="flex min-h-11 w-full items-center gap-2 rounded-lg px-3 text-sm text-sidebar-muted transition-colors hover:bg-sidebar-hover hover:text-white"
+                className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-sidebar-muted hover:bg-sidebar-hover hover:text-white"
               >
-                <LogOut className="size-4" aria-hidden />
+                <LogOut className="size-4" />
                 Sign out
               </button>
             ) : null}
@@ -90,52 +92,15 @@ export function AppSidebar({
         ) : (
           <Link
             href="/login"
-            onClick={onClose}
-            className="flex min-h-11 items-center justify-center rounded-lg bg-primary text-sm font-medium text-white hover:bg-primary/90"
+            className="flex items-center gap-2 text-sm text-sidebar-muted hover:text-white"
           >
+            <GraduationCap className="size-4" />
             Sign in
           </Link>
         )}
-        <p className="mt-4 flex items-center gap-1.5 text-[11px] text-sidebar-muted">
-          <GraduationCap className="size-3.5" aria-hidden />
-          Doyintech Academy
-        </p>
       </div>
     </div>
   );
 
-  return (
-    <>
-      <aside
-        className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-sidebar text-sidebar-fg md:flex"
-        aria-label="Main sidebar"
-      >
-        {content}
-      </aside>
-      <div
-        className={cn(
-          "fixed inset-0 z-50 md:hidden",
-          mobileOpen ? "pointer-events-auto" : "pointer-events-none",
-        )}
-      >
-        <button
-          type="button"
-          aria-label="Close menu"
-          className={cn(
-            "absolute inset-0 bg-black/50 transition-opacity duration-200",
-            mobileOpen ? "opacity-100" : "opacity-0",
-          )}
-          onClick={onClose}
-        />
-        <aside
-          className={cn(
-            "absolute inset-y-0 left-0 w-[min(18rem,88vw)] bg-sidebar text-sidebar-fg shadow-xl transition-transform duration-300 ease-out",
-            mobileOpen ? "translate-x-0" : "-translate-x-full",
-          )}
-        >
-          {content}
-        </aside>
-      </div>
-    </>
-  );
+  return content;
 }
