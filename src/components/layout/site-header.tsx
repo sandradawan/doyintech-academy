@@ -20,7 +20,17 @@ export function SiteHeader() {
   const [student, setStudent] = useState<Student | null>(null);
 
   useEffect(() => {
-    setStudent(getStudent());
+    let cancelled = false;
+    getStudent()
+      .then((s) => {
+        if (!cancelled) setStudent(s);
+      })
+      .catch(() => {
+        if (!cancelled) setStudent(null);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [pathname]);
 
   return (
@@ -61,7 +71,7 @@ export function SiteHeader() {
         </nav>
         <button
           type="button"
-          className="inline-flex size-11 items-center justify-center rounded-md text-fg md:hidden"
+          className="inline-flex size-10 items-center justify-center rounded-md border border-border md:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
           onClick={() => setOpen((v) => !v)}
         >
@@ -69,14 +79,14 @@ export function SiteHeader() {
         </button>
       </div>
       {open ? (
-        <div className="border-t border-border bg-surface px-4 py-4 md:hidden">
+        <div className="border-t border-border px-4 py-3 md:hidden">
           <nav className="flex flex-col gap-1" aria-label="Mobile">
             {nav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="rounded-md px-3 py-3 text-base font-medium text-fg hover:bg-surface-2"
+                className="rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-surface-2 hover:text-fg"
               >
                 {item.label}
               </Link>
@@ -84,7 +94,7 @@ export function SiteHeader() {
             <Link
               href={student ? "/dashboard" : "/login"}
               onClick={() => setOpen(false)}
-              className="mt-2 rounded-md bg-primary px-3 py-3 text-center text-base font-medium text-primary-fg"
+              className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-fg"
             >
               {student ? "Dashboard" : "Sign in"}
             </Link>
