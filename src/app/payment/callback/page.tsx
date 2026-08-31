@@ -6,7 +6,7 @@ import { Suspense, useEffect, useState } from "react";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { markCertificatePaid } from "@/lib/certificates";
 import { getStudent } from "@/lib/auth";
-import { recordCrmPayment } from "@/lib/admin-crm";
+import { recordCrmPaymentDb } from "@/lib/admin-crm";
 import { CERT_FEE_KOBO } from "@/lib/paystack";
 
 function CallbackInner() {
@@ -41,19 +41,22 @@ function CallbackInner() {
         const cert = certificateId || data.metadata?.certificate_id || "";
         if (slug && cert) {
           markCertificatePaid(student?.id, slug, cert);
-          recordCrmPayment({
-            reference: reference,
-            email: data.customer || student?.email || "unknown",
-            studentId: student?.id,
-            courseSlug: slug,
-            courseTitle: data.metadata?.course_title,
-            certificateId: cert,
-            amountKobo: typeof data.amount === "number" ? data.amount : CERT_FEE_KOBO,
-            currency: data.currency || "NGN",
-            status: "success",
-            paidAt: data.paidAt || new Date().toISOString(),
-            provider: "paystack",
-          });
+          try {
+            await recordCrmPaymentDb({
+              reference,
+              email: data.customer || student?.email || "unknown",
+              studentId: student?.id,
+              courseSlug: slug,
+              courseTitle: data.metadata?.course_title,
+              certificateId: cert,
+              amountKobo: typeof data.amount === "number" ? data.amount : CERT_FEE_KOBO,
+              currency: data.currency || "NGN",
+              status: "success",
+              provider: "paystack",
+            });
+          } catch {
+            /* payment verified even if CRM write fails */
+          }
         }
         setStatus("success");
         setMessage("Payment confirmed. Your certificate is ready to download.");
@@ -82,27 +85,17 @@ function CallbackInner() {
         <XCircle className="size-12 text-orange" aria-hidden />
       )}
       <h1 className="mt-4 font-display text-xl font-semibold">
-        {status === "loading"
-          ? "Confirming payment"
-          : status === "success"
-            ? "Payment successful"
-            : "Payment issue"}
+        {status === "loading" ? "Confirming payment" : status === "success" ? "Payment successful" : "Payment issue"}
       </h1>
       <p className="mt-2 text-sm text-muted">{message}</p>
       {reference ? <p className="mt-2 font-mono text-xs text-subtle">Ref: {reference}</p> : null}
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         {courseSlug ? (
-          <Link
-            href={`/courses/${courseSlug}#certificate`}
-            className="inline-flex h-11 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-fg"
-          >
+          <Link href={`/courses/${courseSlug}#certificate`} className="inline-flex h-11 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-fg">
             Back to certificate
           </Link>
         ) : null}
-        <Link
-          href="/dashboard"
-          className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm font-semibold"
-        >
+        <Link href="/dashboard" className="inline-flex h-11 items-center rounded-md border border-border px-4 text-sm font-semibold">
           Dashboard
         </Link>
       </div>
@@ -112,11 +105,7 @@ function CallbackInner() {
 
 export default function PaymentCallbackPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-[40vh] items-center justify-center text-muted">Loading…</div>
-      }
-    >
+    <Suspense fallback={<div className="flex min-h-[40vh] items-center justify-center text-muted">Loading…</div>}>
       <CallbackInner />
     </Suspense>
   );
