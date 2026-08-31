@@ -31,6 +31,7 @@ import { getAllVideoProgress, type VideoProgressRecord } from "@/lib/video-progr
 import { CERT_PASS_SCORE, isCertificatePaid, isCertPassingScore } from "@/lib/certificates";
 import { cn } from "@/lib/utils";
 
+// Student dashboard — StudentShell provides fixed left sidebar + main column
 export default function DashboardPage() {
   const router = useRouter();
   const [student, setStudent] = useState<Student | null>(null);
