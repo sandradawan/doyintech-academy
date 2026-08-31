@@ -123,12 +123,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   const sidebar = (
-    <div className="flex h-full flex-col bg-[#0B0E14] text-white">
-      <div className="flex h-16 items-center border-b border-white/10 px-4">
+    <div className="flex h-full w-full flex-col bg-[#0B0E14] text-white">
+      <div className="flex h-14 shrink-0 items-center border-b border-white/10 px-4">
         <Logo invert />
         <span className="ml-2 rounded bg-orange/20 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-orange uppercase">CRM</span>
       </div>
-      <nav className="flex-1 space-y-0.5 p-3" aria-label="Admin">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto p-3" aria-label="Admin">
         {nav.map((item) => {
           const active = item.exact
             ? pathname === item.href
@@ -145,7 +145,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           );
         })}
       </nav>
-      <div className="border-t border-white/10 p-3">
+      <div className="shrink-0 border-t border-white/10 p-3">
         <p className="mb-2 truncate px-3 text-xs text-white/50">{adminName}</p>
         <Link href="/" className="mb-1 flex items-center gap-2 rounded-md px-3 py-2 text-sm text-white/65 hover:bg-white/5 hover:text-white">View site</Link>
         <button type="button" onClick={logout} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-white/65 hover:bg-white/5 hover:text-white">
@@ -156,25 +156,29 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-dvh bg-bg">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 border-r border-border md:block">{sidebar}</aside>
+    <div className="flex min-h-dvh w-full bg-bg">
+      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 overflow-hidden border-r border-border md:block">
+        {sidebar}
+      </aside>
       {mobile ? (
         <div className="fixed inset-0 z-50 md:hidden">
           <button type="button" className="absolute inset-0 bg-black/50" aria-label="Close menu" onClick={() => setMobile(false)} />
-          <div className="absolute inset-y-0 left-0 w-60 shadow-xl">{sidebar}</div>
+          <div className="absolute inset-y-0 left-0 w-60 max-w-[85vw] shadow-xl">{sidebar}</div>
         </div>
       ) : null}
-      <div className="md:pl-60">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-surface/95 px-4 backdrop-blur">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface/95 px-4 backdrop-blur">
           <button type="button" className="inline-flex size-10 items-center justify-center rounded-md border border-border md:hidden" onClick={() => setMobile(true)} aria-label="Open menu">
             {mobile ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">Admin CRM</p>
-            <p className="truncate text-xs text-muted">Live Supabase data · RLS protected</p>
+            <p className="truncate text-xs text-muted">Live Supabase data</p>
           </div>
         </header>
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">{children}</div>
+        <div className="min-w-0 flex-1 overflow-x-auto">
+          <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">{children}</div>
+        </div>
       </div>
     </div>
   );
