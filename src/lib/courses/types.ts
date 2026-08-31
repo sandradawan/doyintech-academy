@@ -23,6 +23,8 @@ export type Course = {
   level: CourseLevel;
   accent: string;
   hours: number;
+  /** Cover image URL (YouTube thumb or hosted asset) */
+  thumbnail?: string;
   featured?: boolean;
   outcomes: string[];
   modules: CourseModule[];
