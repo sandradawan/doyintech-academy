@@ -1,73 +1,165 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Clapperboard, Code2, Award, Check } from "lucide-react";
+import {
+  ArrowRight,
+  Award,
+  BookOpen,
+  Check,
+  Clapperboard,
+  Code2,
+  Lock,
+  PlayCircle,
+  Sparkles,
+} from "lucide-react";
 import { CourseCard } from "@/components/courses/course-card";
+import { VideoLessonCard } from "@/components/home/video-lesson-card";
 import { WaitlistForm } from "@/components/home/waitlist-form";
 import { catalogStats, featuredCourses } from "@/lib/courses/catalog";
+import { landingVideos, learningSteps, testimonials } from "@/lib/content/landing";
 
 export default function HomePage() {
   const featured = featuredCourses();
   const stats = catalogStats();
+  const [heroVideo, ...moreVideos] = landingVideos;
 
   return (
     <main>
-      <section className="relative isolate overflow-hidden border-b border-border">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-bg to-orange/10" />
-        <div className="relative mx-auto max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
-          <p className="text-xs font-medium tracking-widest text-cyan uppercase">DoyinTech school</p>
-          <h1 className="mt-4 max-w-2xl font-display text-4xl font-medium tracking-tight text-fg sm:text-5xl lg:text-6xl">
-            Learn to code. Ship work you can show.
-          </h1>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-            Short videos, written lessons, and exercises. Finish a course, pass the quiz, and earn a named certificate.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Link href="/courses" className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-6 text-base font-medium text-primary-fg hover:bg-primary/90">
-              Browse courses <ArrowRight className="size-4" />
-            </Link>
-            <Link href="/login" className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-6 text-base font-medium text-fg hover:bg-surface-2">
-              Create student account
-            </Link>
-          </div>
-          <dl className="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-border/80 pt-8">
-            <div><dt className="text-xs tracking-widest text-subtle uppercase">Courses</dt><dd className="mt-1 font-display text-2xl font-medium tabular-nums">{stats.courseCount}</dd></div>
-            <div><dt className="text-xs tracking-widest text-subtle uppercase">Lessons</dt><dd className="mt-1 font-display text-2xl font-medium tabular-nums">{stats.lessonCount}</dd></div>
-            <div><dt className="text-xs tracking-widest text-subtle uppercase">Hours</dt><dd className="mt-1 font-display text-2xl font-medium tabular-nums">{stats.hours}+</dd></div>
-          </dl>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <p className="text-xs font-medium tracking-widest text-cyan uppercase">Method</p>
-        <h2 className="mt-3 font-display text-3xl font-medium tracking-tight">Four moves. Then you can ship.</h2>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { icon: Clapperboard, title: "Watch", body: "Short videos. One idea at a time." },
-            { icon: BookOpen, title: "Read", body: "Written lessons you can search later." },
-            { icon: Code2, title: "Practice", body: "In-browser exercises. You write the code." },
-            { icon: Award, title: "Certify", body: "Pass at 70%. Print a named certificate." },
-          ].map((step, i) => (
-            <article key={step.title} className="rounded-xl bg-surface p-5 shadow-[0_0_0_1px_rgba(15,23,42,0.08)]">
-              <div className="flex items-center justify-between">
-                <step.icon className="size-5 text-cyan" />
-                <span className="font-mono text-xs text-subtle">0{i + 1}</span>
+      <section className="hero-mesh relative isolate overflow-hidden border-b border-border">
+        <div className="relative mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2 lg:items-center lg:py-28">
+          <div className="animate-slide-up">
+            <p className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold tracking-wide text-orange uppercase">
+              <Sparkles className="size-3.5" aria-hidden />
+              DoyinTech school
+            </p>
+            <h1 className="mt-5 max-w-xl font-display text-4xl font-semibold tracking-tight text-fg sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
+              Learn to code. Ship work you can show.
+            </h1>
+            <p className="mt-5 max-w-lg text-base leading-relaxed text-muted sm:text-lg">
+              Short videos, written lessons, and exercises. Finish modules in order, pass the quiz,
+              and earn a named certificate from Doyintech Academy.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Link
+                href="/courses"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary px-6 text-base font-semibold text-primary-fg transition-colors hover:bg-primary/90"
+              >
+                Browse courses <ArrowRight className="size-4" aria-hidden />
+              </Link>
+              <Link
+                href="/login"
+                className="inline-flex h-12 items-center justify-center rounded-lg border border-border bg-surface px-6 text-base font-semibold text-fg transition-colors hover:bg-surface-2"
+              >
+                Create free account
+              </Link>
+            </div>
+            <dl className="mt-12 grid max-w-md grid-cols-3 gap-6 border-t border-border pt-8">
+              <div>
+                <dt className="text-xs font-medium tracking-widest text-subtle uppercase">Courses</dt>
+                <dd className="mt-1 font-display text-2xl font-semibold tabular-nums">{stats.courseCount}</dd>
               </div>
-              <h3 className="mt-5 font-display text-lg font-medium">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{step.body}</p>
-            </article>
-          ))}
+              <div>
+                <dt className="text-xs font-medium tracking-widest text-subtle uppercase">Lessons</dt>
+                <dd className="mt-1 font-display text-2xl font-semibold tabular-nums">{stats.lessonCount}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-medium tracking-widest text-subtle uppercase">Hours</dt>
+                <dd className="mt-1 font-display text-2xl font-semibold tabular-nums">{stats.hours}+</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="animate-slide-up stagger-2">
+            <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-xl shadow-black/5">
+              <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+                <span className="size-2.5 rounded-full bg-red-400/80" />
+                <span className="size-2.5 rounded-full bg-amber-400/80" />
+                <span className="size-2.5 rounded-full bg-emerald-400/80" />
+                <span className="ml-2 text-xs font-medium text-muted">Featured lesson</span>
+              </div>
+              <VideoLessonCard video={heroVideo} featured />
+            </div>
+            <p className="mt-3 text-center text-xs text-muted">
+              Sample lesson video · Full paths unlock inside each course
+            </p>
+          </div>
         </div>
       </section>
 
-      <section className="border-t border-border bg-surface">
-        <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+      <section className="border-b border-border bg-surface py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <p className="text-xs font-semibold tracking-widest text-orange uppercase">Method</p>
+          <h2 className="mt-2 max-w-xl font-display text-3xl font-semibold tracking-tight">
+            Four moves. Then you can ship.
+          </h2>
+          <ol className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {learningSteps.map((step, i) => (
+              <li key={step.title} className="relative rounded-xl border border-border bg-bg p-5">
+                <span className="font-mono text-xs font-semibold text-primary">0{i + 1}</span>
+                <h3 className="mt-2 font-display text-lg font-semibold">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section className="border-b border-border py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-medium tracking-widest text-cyan uppercase">Catalog</p>
-              <h2 className="mt-3 font-display text-3xl font-medium tracking-tight">Start with a path, not a playlist.</h2>
+              <p className="text-xs font-semibold tracking-widest text-orange uppercase">Free sample lessons</p>
+              <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight">Watch before you enroll</h2>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
+                Real lesson topics from Web Foundations, JavaScript, and React. Press play — then continue inside the full course path.
+              </p>
             </div>
-            <Link href="/courses" className="inline-flex h-11 items-center justify-center rounded-md border border-border px-4 text-sm font-medium hover:bg-surface-2">All courses</Link>
+            <Link href="/courses" className="inline-flex h-11 items-center gap-2 text-sm font-semibold text-primary hover:underline">
+              <PlayCircle className="size-4" aria-hidden />
+              All courses
+            </Link>
           </div>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {moreVideos.map((v) => (
+              <VideoLessonCard key={v.id} video={v} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-border bg-surface py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <p className="text-xs font-semibold tracking-widest text-orange uppercase">Curriculum</p>
+          <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight">Built like a studio, not a playlist</h2>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
+            {[
+              { icon: Clapperboard, title: "Short videos", body: "One concept per clip. Notes sit beside the player in every lesson." },
+              { icon: BookOpen, title: "Written content", body: "Markdown lessons, code blocks, and practice prompts." },
+              { icon: Code2, title: "Interactive practice", body: "Exercises after key lessons. Mark complete to unlock modules." },
+              { icon: Lock, title: "Learn as you go", body: "Modules stay locked until the previous one is finished." },
+              { icon: Award, title: "Named certificates", body: "Pass at 70%+ and get a certificate ID you can share." },
+              { icon: Check, title: "Quiz gates", body: "End-of-course assessments before certification." },
+            ].map((item) => (
+              <div key={item.title} className="rounded-xl border border-border bg-bg p-5">
+                <item.icon className="size-5 text-primary" aria-hidden />
+                <h3 className="mt-3 font-display text-lg font-semibold">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{item.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-border py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold tracking-widest text-orange uppercase">Catalog</p>
+              <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight">Start with a path, not a playlist</h2>
+            </div>
+            <Link href="/courses" className="inline-flex h-11 items-center justify-center rounded-md border border-border px-4 text-sm font-semibold hover:bg-surface-2">
+              All courses
+            </Link>
+          </div>
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((course) => (
               <CourseCard key={course.slug} course={course} />
             ))}
@@ -75,29 +167,51 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <p className="text-xs font-medium tracking-widest text-cyan uppercase">Proof</p>
-        <h2 className="mt-3 max-w-2xl font-display text-3xl font-medium tracking-tight">A certificate with your name.</h2>
-        <ul className="mt-6 space-y-3">
-          {["Your legal name on the document", "Course title, date, and unique ID", "Issued only after a passing quiz score"].map((item) => (
-            <li key={item} className="flex items-start gap-3 text-sm text-fg">
-              <Check className="mt-0.5 size-4 shrink-0 text-cyan" />{item}
-            </li>
-          ))}
-        </ul>
-        <Link href="/certificates" className="mt-8 inline-flex h-11 items-center rounded-md border border-border px-4 text-sm font-medium hover:bg-surface-2">How certification works</Link>
+      <section className="border-b border-border bg-surface py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <p className="text-xs font-semibold tracking-widest text-orange uppercase">Students</p>
+          <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight">Built for people who want to ship</h2>
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
+            {testimonials.map((t) => (
+              <blockquote key={t.name} className="flex flex-col rounded-xl border border-border bg-bg p-6">
+                <p className="flex-1 text-sm leading-relaxed text-muted">&ldquo;{t.quote}&rdquo;</p>
+                <footer className="mt-6 border-t border-border pt-4">
+                  <p className="text-sm font-semibold text-fg">{t.name}</p>
+                  <p className="text-xs text-muted">{t.role}</p>
+                </footer>
+              </blockquote>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <section className="border-t border-border bg-surface">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:items-center">
+      <section className="py-20">
+        <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center">
           <div>
-            <p className="text-xs font-medium tracking-widest text-cyan uppercase">Launch</p>
-            <h2 className="mt-3 font-display text-3xl font-medium tracking-tight">First cohort is forming.</h2>
-            <p className="mt-4 text-base leading-relaxed text-muted">
-              Self-serve courses are open now. Live cohort seats, graded projects, and faculty office hours open for waitlisted students first.
+            <p className="text-xs font-semibold tracking-widest text-orange uppercase">Certificate</p>
+            <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight">A credential with your name on it</h2>
+            <p className="mt-4 text-sm leading-relaxed text-muted">
+              Complete the path, pass the quiz, and download a certificate designed in the DoyinTech brand.
             </p>
+            <ul className="mt-6 space-y-3 text-sm text-muted">
+              {["Student full name", "Course title and score", "Unique certificate ID", "Issue date"].map((line) => (
+                <li key={line} className="flex items-center gap-2">
+                  <Check className="size-4 text-success" aria-hidden />
+                  {line}
+                </li>
+              ))}
+            </ul>
+            <Link href="/certificates" className="mt-8 inline-flex h-11 items-center text-sm font-semibold text-primary hover:underline">
+              See certificate design →
+            </Link>
           </div>
-          <WaitlistForm />
+          <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
+            <h3 className="font-display text-xl font-semibold">Stay in the loop</h3>
+            <p className="mt-2 text-sm text-muted">New lessons and courses drop regularly. Join the list for launch notes.</p>
+            <div className="mt-6">
+              <WaitlistForm />
+            </div>
+          </div>
         </div>
       </section>
     </main>
