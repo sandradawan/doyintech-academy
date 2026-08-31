@@ -9,8 +9,8 @@ import {
   CERT_PASS_SCORE,
   isCertificatePaid,
   isCertPassingScore,
-  markCertificatePaid,
 } from "@/lib/certificates";
+import { getStudent } from "@/lib/auth";
 
 export function CertificateClaim({
   studentName,
@@ -20,6 +20,7 @@ export function CertificateClaim({
   quizScore,
   certificateId,
   certifiedAt,
+  studentEmail,
 }: {
   studentName: string;
   studentId?: string;
@@ -28,9 +29,11 @@ export function CertificateClaim({
   quizScore?: number;
   certificateId?: string;
   certifiedAt?: string;
+  studentEmail?: string;
 }) {
   const [paid, setPaid] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState("");
   const printRef = useRef<HTMLDivElement>(null);
 
   const unlocked = isCertPassingScore(quizScore) && Boolean(certificateId);
@@ -51,7 +54,9 @@ export function CertificateClaim({
           your certificate. Video progress alone does not issue a credential.
         </p>
         {typeof quizScore === "number" ? (
-          <p className="mt-3 text-sm text-orange">Current best score: {quizScore}% — need {CERT_PASS_SCORE}%.</p>
+          <p className="mt-3 text-sm text-orange">
+            Current best score: {quizScore}% — need {CERT_PASS_SCORE}%.
+          </p>
         ) : null}
       </div>
     );
@@ -60,7 +65,9 @@ export function CertificateClaim({
   if (!certificateId) {
     return (
       <div className="rounded-xl border border-border bg-surface p-5">
-        <p className="text-sm text-muted">You passed ({quizScore}%). Issuing certificate ID… refresh if it does not appear.</p>
+        <p className="text-sm text-muted">
+          You passed ({quizScore}%). Issuing certificate ID… refresh if it does not appear.
+        </p>
       </div>
     );
   }
@@ -73,12 +80,42 @@ export function CertificateClaim({
     score: quizScore,
   };
 
-  async function handlePay() {
+  async function handlePaystack() {
     setPaying(true);
-    await new Promise((r) => setTimeout(r, 600));
-    markCertificatePaid(studentId, courseSlug, certificateId);
-    setPaid(true);
-    setPaying(false);
+    setPayError("");
+    try {
+      let email = studentEmail;
+      if (!email) {
+        const s = await getStudent();
+        email = s?.email;
+      }
+      if (!email) {
+        setPayError("Sign in with an email account to pay with Paystack.");
+        setPaying(false);
+        return;
+      }
+      const res = await fetch("/api/paystack/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          courseSlug,
+          certificateId,
+          courseTitle,
+          studentId,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.authorization_url) {
+        setPayError(json.error || "Could not start Paystack checkout.");
+        setPaying(false);
+        return;
+      }
+      window.location.href = json.authorization_url as string;
+    } catch {
+      setPayError("Network error starting checkout.");
+      setPaying(false);
+    }
   }
 
   function handleDownload() {
@@ -123,23 +160,22 @@ export function CertificateClaim({
         ) : (
           <button
             type="button"
-            onClick={handlePay}
+            onClick={handlePaystack}
             disabled={paying}
-            className="inline-flex h-11 items-center gap-2 rounded-md border border-border bg-bg px-4 text-sm font-semibold text-fg hover:bg-surface-2 disabled:opacity-60"
+            className="inline-flex h-11 items-center gap-2 rounded-md bg-[#00C3F7] px-4 text-sm font-semibold text-[#0B0E14] hover:opacity-90 disabled:opacity-60"
           >
             <Lock className="size-4" aria-hidden />
-            {paying ? "Processing…" : `Pay ${CERT_FEE_LABEL} to download`}
+            {paying ? "Redirecting to Paystack…" : `Pay ${CERT_FEE_LABEL} with Paystack`}
           </button>
         )}
       </div>
 
+      {payError ? <p className="text-sm text-red-500">{payError}</p> : null}
+
       {!paid ? (
         <div className="rounded-lg border border-orange/30 bg-orange/5 p-4 text-sm text-muted">
-          <p className="font-medium text-fg">Download locked until payment</p>
+          <p className="font-medium text-fg">Download locked until Paystack payment</p>
           <p className="mt-1">{CERT_FEE_NOTE}</p>
-          <p className="mt-2 text-xs text-subtle">
-            You already earned the credential by passing the quiz. Payment only releases the downloadable file.
-          </p>
         </div>
       ) : null}
 
