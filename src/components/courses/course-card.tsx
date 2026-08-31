@@ -8,9 +8,18 @@ export function CourseCard({ course }: { course: Course }) {
   return (
     <Link href={`/courses/${course.slug}`} className="group block h-full">
       <article className="card-lift flex h-full flex-col overflow-hidden rounded-xl border border-border bg-surface">
-        <div className={`relative aspect-[16/9] bg-gradient-to-br ${course.accent}`}>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_55%)]" />
-          <span className="absolute left-3 top-3 rounded bg-black/45 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
+        <div className={`relative aspect-[16/9] overflow-hidden bg-gradient-to-br ${course.accent}`}>
+          {course.thumbnail ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={course.thumbnail}
+              alt=""
+              className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              loading="lazy"
+            />
+          ) : null}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-black/10" />
+          <span className="absolute left-3 top-3 rounded bg-black/50 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
             {course.level}
           </span>
           {course.featured ? (
@@ -18,6 +27,9 @@ export function CourseCard({ course }: { course: Course }) {
               <Star className="size-3 fill-white" aria-hidden /> Bestseller
             </span>
           ) : null}
+          <p className="absolute bottom-3 left-3 right-3 font-display text-base font-semibold text-white drop-shadow">
+            {course.title}
+          </p>
         </div>
         <div className="flex flex-1 flex-col p-4">
           <h2 className="line-clamp-2 font-display text-base font-semibold leading-snug tracking-tight text-fg group-hover:text-primary">

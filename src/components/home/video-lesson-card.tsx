@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Clapperboard, Play } from "lucide-react";
+import { Clapperboard } from "lucide-react";
 import type { LandingVideo } from "@/lib/content/landing";
+import { VideoPlayer } from "@/components/media/video-player";
 import { cn } from "@/lib/utils";
 
 export function VideoLessonCard({
@@ -13,8 +13,6 @@ export function VideoLessonCard({
   video: LandingVideo;
   featured?: boolean;
 }) {
-  const [playing, setPlaying] = useState(false);
-
   return (
     <article
       className={cn(
@@ -22,35 +20,19 @@ export function VideoLessonCard({
         featured && "sm:col-span-2 lg:col-span-2",
       )}
     >
-      <div className="relative aspect-video bg-surface-2">
-        {playing ? (
-          <iframe
-            title={video.title}
-            src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}?autoplay=1&rel=0`}
-            className="absolute inset-0 size-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={() => setPlaying(true)}
-            className="group absolute inset-0 flex size-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-primary/20 via-surface-2 to-orange/15"
-            aria-label={`Play ${video.title}`}
-          >
-            <span className="flex size-16 items-center justify-center rounded-full bg-primary text-primary-fg shadow-lg transition-transform group-hover:scale-105">
-              <Play className="size-7 fill-current pl-0.5" aria-hidden />
-            </span>
-            <span className="text-xs font-medium text-muted">{video.duration}</span>
-          </button>
-        )}
-      </div>
+      <VideoPlayer
+        videoId={video.id}
+        youtubeId={video.youtubeId}
+        title={video.title}
+        thumbnailUrl={video.thumbnail}
+      />
       <div className="flex flex-1 flex-col p-4 sm:p-5">
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1 text-xs font-medium text-orange">
             <Clapperboard className="size-3.5" aria-hidden />
             {video.course}
           </span>
+          <span className="text-xs text-subtle">{video.duration}</span>
           {video.topics.map((t) => (
             <span
               key={t}
