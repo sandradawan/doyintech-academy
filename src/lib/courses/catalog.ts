@@ -1,3 +1,4 @@
+import { youtubeThumb } from "@/lib/video-progress";
 import type { Course } from "./types";
 import { courseLessonCount } from "./types";
 
@@ -8,6 +9,7 @@ function L(id: string, title: string, durationMin: number, kind: Course["modules
 export const courses: Course[] = [
   {
     slug: "web-foundations",
+    thumbnail: youtubeThumb("UB1O30fX-d8", "hq"),
     title: "Web Foundations",
     tagline: "HTML, CSS, and JavaScript — the three languages of the web.",
     description: "Structure documents, style layouts, and add behaviour until you can ship a responsive site without a framework.",
@@ -39,6 +41,7 @@ export const courses: Course[] = [
   },
   {
     slug: "javascript-mastery",
+    thumbnail: youtubeThumb("W6NZfCO5SIk", "hq"),
     title: "JavaScript Mastery",
     tagline: "Modern JS — the language, not the framework.",
     description: "Own scope, arrays, async, and modules well enough to read production code.",
@@ -67,6 +70,7 @@ export const courses: Course[] = [
   },
   {
     slug: "react-essentials",
+    thumbnail: youtubeThumb("Tn6-PIqc4UM", "hq"),
     title: "React Essentials",
     tagline: "Components, state, and hooks — the parts you will use every day.",
     description: "Think in components, lift state on purpose, and ship a small interactive app.",
@@ -94,6 +98,7 @@ export const courses: Course[] = [
   },
   {
     slug: "typescript-for-developers",
+    thumbnail: youtubeThumb("30LWjhZzg50", "hq"),
     title: "TypeScript for Developers",
     tagline: "Types that catch bugs before your users do.",
     description: "Model data with interfaces and unions, and read compiler errors as instructions.",
@@ -117,6 +122,7 @@ export const courses: Course[] = [
   },
   {
     slug: "backend-apis-node",
+    thumbnail: youtubeThumb("fgTGADljAeg", "hq"),
     title: "Backend APIs with Node",
     tagline: "REST, validation, and data — the server side of a product.",
     description: "Design resources, validate input, persist records, and protect routes.",
@@ -143,6 +149,7 @@ export const courses: Course[] = [
   },
   {
     slug: "git-professional-workflow",
+    thumbnail: youtubeThumb("RGOj5yH7evk", "hq"),
     title: "Git & Professional Workflow",
     tagline: "Commits, branches, and pull requests that other people can trust.",
     description: "Write commits that explain themselves and open PRs that review cleanly.",
