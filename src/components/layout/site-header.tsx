@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, Search, X } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Logo } from "@/components/brand/logo";
 import { getStudent, type Student } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -78,6 +79,7 @@ export function SiteHeader() {
             </Link>
           )}
         </nav>
+        <ThemeToggle className="shrink-0" />
         <button
           type="button"
           className="inline-flex size-11 items-center justify-center rounded-md border border-border md:hidden"
