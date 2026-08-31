@@ -1,9 +1,6 @@
 "use client";
 
-const PAYMENTS_KEY = "doyintech-academy-crm-payments";
-const STUDENTS_KEY = "doyintech-academy-crm-students";
-const NOTES_KEY = "doyintech-academy-crm-notes";
-const ACTIVITY_KEY = "doyintech-academy-crm-activity";
+import { createClient } from "@/lib/supabase/client";
 
 export type CrmPayment = {
   id: string;
@@ -32,15 +29,6 @@ export type CrmStudent = {
   status: "active" | "inactive" | "suspended";
 };
 
-export type CrmNote = {
-  id: string;
-  entityType: "student" | "payment" | "content";
-  entityId: string;
-  body: string;
-  createdAt: string;
-  author: string;
-};
-
 export type CrmActivity = {
   id: string;
   type: string;
@@ -49,156 +37,280 @@ export type CrmActivity = {
   meta?: Record<string, string>;
 };
 
-function parse<T>(raw: string | null, fallback: T): T {
-  if (!raw) return fallback;
-  try {
-    return JSON.parse(raw) as T;
-  } catch {
-    return fallback;
+export type CrmWaitlistEntry = {
+  id: string;
+  email: string;
+  name: string | null;
+  source: string | null;
+  createdAt: string;
+};
+
+export type ContentOverrideRow = {
+  id: string;
+  courseSlug: string;
+  lessonId: string;
+  title?: string;
+  summary?: string;
+  videoUrl?: string;
+  body?: string;
+  updatedAt: string;
+};
+
+function sb() {
+  return createClient() as any;
+}
+
+export async function fetchIsAdmin(): Promise<boolean> {
+  const supabase = sb();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+  const { data } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  return data?.role === "admin";
+}
+
+export async function fetchCrmStudents(): Promise<CrmStudent[]> {
+  const supabase = sb();
+  const { data: profiles, error } = await supabase
+    .from("profiles")
+    .select("id, email, full_name, role, status, created_at, updated_at")
+    .order("created_at", { ascending: false });
+  if (error || !profiles) return [];
+  const { data: enrollments } = await supabase
+    .from("enrollments")
+    .select("user_id, course_slug, certificate_id");
+  const byUser = new Map<string, { courses: string[]; certs: number }>();
+  for (const e of enrollments ?? []) {
+    const cur = byUser.get(e.user_id) ?? { courses: [], certs: 0 };
+    cur.courses.push(e.course_slug);
+    if (e.certificate_id) cur.certs += 1;
+    byUser.set(e.user_id, cur);
   }
+  return (profiles as any[]).map((p) => {
+    const agg = byUser.get(p.id) ?? { courses: [], certs: 0 };
+    return {
+      id: p.id,
+      name: p.full_name || p.email?.split("@")[0] || "Student",
+      email: p.email,
+      role: (p.role as "student" | "admin") || "student",
+      createdAt: p.created_at,
+      enrolledCourses: agg.courses,
+      certificateCount: agg.certs,
+      lastActiveAt: p.updated_at,
+      status: (p.status as CrmStudent["status"]) || "active",
+    };
+  });
 }
 
-function uid(prefix: string) {
-  return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
+export async function setStudentStatusDb(id: string, status: CrmStudent["status"]) {
+  const supabase = sb();
+  const { error } = await supabase.rpc("admin_set_student_status", {
+    p_user_id: id,
+    p_status: status,
+  });
+  if (error) {
+    const { error: e2 } = await supabase
+      .from("profiles")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", id);
+    if (e2) throw new Error(e2.message);
+  }
+  await pushActivityDb({ type: "student", message: `Student status set to ${status}`, meta: { studentId: id } });
 }
 
-export function getCrmPayments(): CrmPayment[] {
-  if (typeof window === "undefined") return [];
-  return parse<CrmPayment[]>(localStorage.getItem(PAYMENTS_KEY), []).sort((a, b) =>
-    b.paidAt.localeCompare(a.paidAt),
-  );
+export async function fetchCrmPayments(): Promise<CrmPayment[]> {
+  const supabase = sb();
+  const { data, error } = await supabase.from("payments").select("*").order("paid_at", { ascending: false });
+  if (error || !data) return [];
+  return (data as any[]).map((p) => ({
+    id: p.id,
+    reference: p.reference,
+    email: p.email,
+    studentId: p.user_id ?? undefined,
+    courseSlug: p.course_slug,
+    courseTitle: p.course_title ?? undefined,
+    certificateId: p.certificate_id,
+    amountKobo: p.amount_kobo,
+    currency: p.currency || "NGN",
+    status: p.status,
+    paidAt: p.paid_at,
+    provider: p.provider || "paystack",
+  }));
 }
 
-export function recordCrmPayment(input: Omit<CrmPayment, "id">) {
-  const list = getCrmPayments();
-  const existing = list.findIndex((p) => p.reference === input.reference);
-  const row: CrmPayment = { ...input, id: existing >= 0 ? list[existing].id : uid("pay") };
-  if (existing >= 0) list[existing] = row;
-  else list.unshift(row);
-  localStorage.setItem(PAYMENTS_KEY, JSON.stringify(list));
-  pushActivity({
+export async function recordCrmPaymentDb(input: {
+  reference: string;
+  email: string;
+  studentId?: string;
+  courseSlug: string;
+  courseTitle?: string;
+  certificateId: string;
+  amountKobo: number;
+  currency?: string;
+  status: "success" | "failed" | "pending";
+  provider: "paystack" | "manual";
+}) {
+  const supabase = sb();
+  const { data, error } = await supabase.rpc("record_payment", {
+    p_reference: input.reference,
+    p_email: input.email,
+    p_course_slug: input.courseSlug,
+    p_certificate_id: input.certificateId,
+    p_amount_kobo: input.amountKobo,
+    p_status: input.status,
+    p_provider: input.provider,
+    p_course_title: input.courseTitle ?? null,
+    p_currency: input.currency || "NGN",
+    p_user_id: input.studentId ?? null,
+  });
+  if (error) {
+    const { error: e2 } = await supabase.from("payments").upsert(
+      {
+        reference: input.reference,
+        user_id: input.studentId ?? null,
+        email: input.email.toLowerCase().trim(),
+        course_slug: input.courseSlug,
+        course_title: input.courseTitle ?? null,
+        certificate_id: input.certificateId,
+        amount_kobo: input.amountKobo,
+        currency: input.currency || "NGN",
+        status: input.status,
+        provider: input.provider,
+        paid_at: new Date().toISOString(),
+      },
+      { onConflict: "reference" },
+    );
+    if (e2) throw new Error(e2.message);
+  }
+  await pushActivityDb({
     type: "payment",
     message: `Payment ${input.status}: ${input.email} · ${input.certificateId}`,
     meta: { reference: input.reference, course: input.courseSlug },
   });
-  return row;
+  return data;
 }
 
-export function paymentStats() {
-  const all = getCrmPayments();
-  const success = all.filter((p) => p.status === "success");
+export function paymentStatsFrom(rows: CrmPayment[]) {
+  const success = rows.filter((p) => p.status === "success");
   const revenueKobo = success.reduce((s, p) => s + p.amountKobo, 0);
   return {
-    total: all.length,
+    total: rows.length,
     success: success.length,
-    failed: all.filter((p) => p.status === "failed").length,
+    failed: rows.filter((p) => p.status === "failed").length,
     revenueKobo,
     revenueNgn: revenueKobo / 100,
   };
 }
 
-export function getCrmStudents(): CrmStudent[] {
-  if (typeof window === "undefined") return [];
-  return parse<CrmStudent[]>(localStorage.getItem(STUDENTS_KEY), []).sort((a, b) =>
-    b.createdAt.localeCompare(a.createdAt),
+export async function fetchWaitlistDb(): Promise<CrmWaitlistEntry[]> {
+  const supabase = sb();
+  const { data, error } = await supabase.from("waitlist").select("*").order("created_at", { ascending: false });
+  if (error || !data) return [];
+  return (data as any[]).map((w) => ({
+    id: w.id,
+    email: w.email,
+    name: w.name,
+    source: w.source,
+    createdAt: w.created_at,
+  }));
+}
+
+export async function fetchContentOverrides(): Promise<ContentOverrideRow[]> {
+  const supabase = sb();
+  const { data, error } = await supabase.from("content_overrides").select("*");
+  if (error || !data) return [];
+  return (data as any[]).map((o) => ({
+    id: o.id,
+    courseSlug: o.course_slug,
+    lessonId: o.lesson_id,
+    title: o.title ?? undefined,
+    summary: o.summary ?? undefined,
+    videoUrl: o.video_url ?? undefined,
+    body: o.body ?? undefined,
+    updatedAt: o.updated_at,
+  }));
+}
+
+export async function saveContentOverrideDb(input: {
+  courseSlug: string;
+  lessonId: string;
+  title?: string;
+  summary?: string;
+  videoUrl?: string;
+  body?: string;
+}) {
+  const supabase = sb();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { error } = await supabase.from("content_overrides").upsert(
+    {
+      course_slug: input.courseSlug,
+      lesson_id: input.lessonId,
+      title: input.title ?? null,
+      summary: input.summary ?? null,
+      video_url: input.videoUrl ?? null,
+      body: input.body ?? null,
+      updated_by: user?.id ?? null,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "course_slug,lesson_id" },
   );
-}
-
-export function upsertCrmStudent(student: CrmStudent) {
-  const list = getCrmStudents();
-  const i = list.findIndex((s) => s.id === student.id || s.email === student.email);
-  if (i >= 0) list[i] = { ...list[i], ...student };
-  else list.unshift(student);
-  localStorage.setItem(STUDENTS_KEY, JSON.stringify(list));
-  return student;
-}
-
-export function setStudentStatus(id: string, status: CrmStudent["status"]) {
-  const list = getCrmStudents();
-  const i = list.findIndex((s) => s.id === id);
-  if (i < 0) return;
-  list[i] = { ...list[i], status };
-  localStorage.setItem(STUDENTS_KEY, JSON.stringify(list));
-  pushActivity({
-    type: "student",
-    message: `Student ${list[i].email} marked ${status}`,
-    meta: { studentId: id },
+  if (error) throw new Error(error.message);
+  await pushActivityDb({
+    type: "content",
+    message: `Updated content for ${input.lessonId} (${input.courseSlug})`,
+    meta: { lessonId: input.lessonId, courseSlug: input.courseSlug },
   });
 }
 
-export function seedDemoStudentsIfEmpty() {
-  if (getCrmStudents().length > 0) return;
-  const demos: CrmStudent[] = [
-    {
-      id: "stu_demo_1",
-      name: "Adaeze Okonkwo",
-      email: "adaeze@example.com",
-      role: "student",
-      createdAt: "2026-08-01T10:00:00.000Z",
-      enrolledCourses: ["web-foundations", "react-essentials"],
-      certificateCount: 1,
-      lastActiveAt: "2026-08-30T12:00:00.000Z",
-      status: "active",
-    },
-    {
-      id: "stu_demo_2",
-      name: "Kwame Boateng",
-      email: "kwame@example.com",
-      role: "student",
-      createdAt: "2026-08-10T09:00:00.000Z",
-      enrolledCourses: ["javascript-mastery"],
-      certificateCount: 0,
-      lastActiveAt: "2026-08-28T18:00:00.000Z",
-      status: "active",
-    },
-    {
-      id: "stu_demo_3",
-      name: "Ngozi Ibe",
-      email: "ngozi@example.com",
-      role: "student",
-      createdAt: "2026-08-15T14:00:00.000Z",
-      enrolledCourses: ["git-professional-workflow"],
-      certificateCount: 0,
-      status: "inactive",
-    },
-  ];
-  localStorage.setItem(STUDENTS_KEY, JSON.stringify(demos));
+export async function fetchCrmActivity(limit = 30): Promise<CrmActivity[]> {
+  const supabase = sb();
+  const { data, error } = await supabase
+    .from("admin_activity")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error || !data) return [];
+  return (data as any[]).map((a) => ({
+    id: a.id,
+    type: a.activity_type,
+    message: a.message,
+    createdAt: a.created_at,
+    meta: (a.meta as Record<string, string>) || undefined,
+  }));
 }
 
-export function getCrmNotes(entityType?: string, entityId?: string): CrmNote[] {
-  if (typeof window === "undefined") return [];
-  let list = parse<CrmNote[]>(localStorage.getItem(NOTES_KEY), []);
-  if (entityType) list = list.filter((n) => n.entityType === entityType);
-  if (entityId) list = list.filter((n) => n.entityId === entityId);
-  return list.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-}
-
-export function addCrmNote(input: Omit<CrmNote, "id" | "createdAt">) {
-  const list = getCrmNotes();
-  const note: CrmNote = {
-    ...input,
-    id: uid("note"),
-    createdAt: new Date().toISOString(),
-  };
-  list.unshift(note);
-  localStorage.setItem(NOTES_KEY, JSON.stringify(list));
-  return note;
-}
-
-export function getCrmActivity(limit = 30): CrmActivity[] {
-  if (typeof window === "undefined") return [];
-  return parse<CrmActivity[]>(localStorage.getItem(ACTIVITY_KEY), []).slice(0, limit);
-}
-
-export function pushActivity(input: Omit<CrmActivity, "id" | "createdAt">) {
-  if (typeof window === "undefined") return;
-  const list = getCrmActivity(100);
-  list.unshift({
-    ...input,
-    id: uid("act"),
-    createdAt: new Date().toISOString(),
+export async function pushActivityDb(input: { type: string; message: string; meta?: Record<string, string> }) {
+  const supabase = sb();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  await supabase.from("admin_activity").insert({
+    actor_id: user?.id ?? null,
+    activity_type: input.type,
+    message: input.message,
+    meta: input.meta ?? {},
   });
-  localStorage.setItem(ACTIVITY_KEY, JSON.stringify(list.slice(0, 100)));
+}
+
+export async function fetchEnrollmentMap(): Promise<
+  { courseSlug: string; userId: string; studentName: string; studentEmail: string }[]
+> {
+  const supabase = sb();
+  const { data, error } = await supabase.from("enrollments").select(`
+    course_slug,
+    user_id,
+    profiles ( full_name, email )
+  `);
+  if (error || !data) return [];
+  return (data as any[]).map((e) => ({
+    courseSlug: e.course_slug,
+    userId: e.user_id,
+    studentName: e.profiles?.full_name || "Student",
+    studentEmail: e.profiles?.email || "",
+  }));
 }
 
 export function formatNgn(amountNgn: number) {
