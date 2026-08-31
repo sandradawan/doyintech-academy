@@ -105,7 +105,7 @@ function NavContent({
   );
 }
 
-/** Full student shell: fixed sidebar + mobile drawer + main area */
+/** Full student shell: fixed left sidebar + main content */
 export function StudentShell({
   student,
   onSignOut,
@@ -124,8 +124,8 @@ export function StudentShell({
   const [mobile, setMobile] = useState(false);
 
   return (
-    <div className="flex min-h-dvh w-full bg-bg text-fg">
-      <aside className="sticky top-0 hidden h-dvh w-56 shrink-0 overflow-hidden border-r border-border md:block lg:w-60">
+    <div className="relative min-h-dvh w-full bg-bg text-fg">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 border-r border-border md:block">
         <NavContent student={student} onSignOut={onSignOut} />
       </aside>
 
@@ -147,7 +147,7 @@ export function StudentShell({
         </div>
       ) : null}
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-dvh min-w-0 flex-col md:pl-60">
         <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface/95 px-4 backdrop-blur">
           <button
             type="button"
@@ -163,7 +163,7 @@ export function StudentShell({
           </div>
           {actions}
         </header>
-        <div className="min-w-0 flex-1 overflow-x-auto">
+        <div className="min-w-0 flex-1">
           <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">{children}</div>
         </div>
       </div>
