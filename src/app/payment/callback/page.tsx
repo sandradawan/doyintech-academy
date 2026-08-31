@@ -6,6 +6,8 @@ import { Suspense, useEffect, useState } from "react";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { markCertificatePaid } from "@/lib/certificates";
 import { getStudent } from "@/lib/auth";
+import { recordCrmPayment } from "@/lib/admin-crm";
+import { CERT_FEE_KOBO } from "@/lib/paystack";
 
 function CallbackInner() {
   const params = useSearchParams();
@@ -39,6 +41,19 @@ function CallbackInner() {
         const cert = certificateId || data.metadata?.certificate_id || "";
         if (slug && cert) {
           markCertificatePaid(student?.id, slug, cert);
+          recordCrmPayment({
+            reference: reference,
+            email: data.customer || student?.email || "unknown",
+            studentId: student?.id,
+            courseSlug: slug,
+            courseTitle: data.metadata?.course_title,
+            certificateId: cert,
+            amountKobo: typeof data.amount === "number" ? data.amount : CERT_FEE_KOBO,
+            currency: data.currency || "NGN",
+            status: "success",
+            paidAt: data.paidAt || new Date().toISOString(),
+            provider: "paystack",
+          });
         }
         setStatus("success");
         setMessage("Payment confirmed. Your certificate is ready to download.");
