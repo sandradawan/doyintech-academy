@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -9,7 +10,9 @@ import {
   Home,
   LayoutDashboard,
   LogOut,
+  Menu,
   Search,
+  X,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
@@ -23,25 +26,23 @@ const mainNav = [
   { href: "/", label: "Home", icon: Home },
 ] as const;
 
-export function AppSidebar({
+function NavContent({
   student,
   onSignOut,
-  mobileOpen,
   onClose,
 }: {
   student: Student | null;
   onSignOut?: () => void;
-  mobileOpen?: boolean;
   onClose?: () => void;
 }) {
   const pathname = usePathname();
 
-  const content = (
-    <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center border-b border-white/10 px-4">
+  return (
+    <div className="flex h-full flex-col bg-sidebar text-sidebar-fg">
+      <div className="flex h-14 shrink-0 items-center border-b border-white/10 px-4">
         <Logo invert />
       </div>
-      <nav className="flex-1 space-y-1 p-3" aria-label="Student">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto p-3" aria-label="Student">
         {mainNav.map((item) => {
           const active =
             item.href === "/dashboard"
@@ -54,7 +55,7 @@ export function AppSidebar({
               href={item.href}
               onClick={onClose}
               className={cn(
-                "flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors duration-200",
+                "flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors",
                 active
                   ? "bg-white/12 text-white"
                   : "text-sidebar-muted hover:bg-sidebar-hover hover:text-white",
@@ -66,11 +67,11 @@ export function AppSidebar({
           );
         })}
       </nav>
-      <div className="border-t border-white/10 p-4">
+      <div className="shrink-0 border-t border-white/10 p-3">
         {student ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 px-2 py-1">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
                 {student.name.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
@@ -82,7 +83,7 @@ export function AppSidebar({
               <button
                 type="button"
                 onClick={onSignOut}
-                className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-sidebar-muted hover:bg-sidebar-hover hover:text-white"
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-sidebar-muted hover:bg-sidebar-hover hover:text-white"
               >
                 <LogOut className="size-4" />
                 Sign out
@@ -92,7 +93,8 @@ export function AppSidebar({
         ) : (
           <Link
             href="/login"
-            className="flex items-center gap-2 text-sm text-sidebar-muted hover:text-white"
+            onClick={onClose}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-sidebar-muted hover:text-white"
           >
             <GraduationCap className="size-4" />
             Sign in
@@ -101,6 +103,85 @@ export function AppSidebar({
       </div>
     </div>
   );
+}
 
-  return content;
+/** Full student shell: fixed sidebar + mobile drawer + main area */
+export function StudentShell({
+  student,
+  onSignOut,
+  title,
+  subtitle,
+  actions,
+  children,
+}: {
+  student: Student | null;
+  onSignOut?: () => void;
+  title?: string;
+  subtitle?: string;
+  actions?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const [mobile, setMobile] = useState(false);
+
+  return (
+    <div className="flex min-h-dvh w-full bg-bg text-fg">
+      <aside className="sticky top-0 hidden h-dvh w-56 shrink-0 overflow-hidden border-r border-border md:block lg:w-60">
+        <NavContent student={student} onSignOut={onSignOut} />
+      </aside>
+
+      {mobile ? (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/50"
+            aria-label="Close menu"
+            onClick={() => setMobile(false)}
+          />
+          <div className="absolute inset-y-0 left-0 w-60 max-w-[85vw] shadow-xl">
+            <NavContent
+              student={student}
+              onSignOut={onSignOut}
+              onClose={() => setMobile(false)}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface/95 px-4 backdrop-blur">
+          <button
+            type="button"
+            className="inline-flex size-10 items-center justify-center rounded-md border border-border md:hidden"
+            onClick={() => setMobile(true)}
+            aria-label="Open menu"
+          >
+            {mobile ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
+          <div className="min-w-0 flex-1">
+            {title ? <p className="truncate text-sm font-semibold">{title}</p> : null}
+            {subtitle ? <p className="truncate text-xs text-muted">{subtitle}</p> : null}
+          </div>
+          {actions}
+        </header>
+        <div className="min-w-0 flex-1 overflow-x-auto">
+          <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function AppSidebar(props: {
+  student: Student | null;
+  onSignOut?: () => void;
+  mobileOpen?: boolean;
+  onClose?: () => void;
+}) {
+  return (
+    <NavContent
+      student={props.student}
+      onSignOut={props.onSignOut}
+      onClose={props.onClose}
+    />
+  );
 }
