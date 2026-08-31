@@ -1,0 +1,8 @@
+{
+  "id": "nx-1-1",
+  "title": "Next.js App Router",
+  "goals": ["Explain app directory", "Create a layout", "Add a page route"],
+  "body": "## App Router\n\nNext.js App Router uses folders for routes.\n\n```tsx\n// app/page.tsx\nexport default function Home() {\n  return <h1>Doyintech Academy</h1>;\n}\n```",
+  "youtubeId": "ZVBC_EZvnfI",
+  "thumbnail": "https://i.ytimg.com/vi/ZVBC_EZvnfI/hqdefault.jpg"
+}

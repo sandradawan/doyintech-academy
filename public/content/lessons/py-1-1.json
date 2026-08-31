@@ -1,0 +1,8 @@
+{
+  "id": "py-1-1",
+  "title": "Python full course overview",
+  "goals": ["Run Python in a REPL", "Print and read input", "Explain why Python is popular"],
+  "body": "## Python overview\n\nPython is a high-level language known for readable syntax.\n\n```python\nprint('Hello, Doyintech')\nname = input('Your name: ')\nprint(f'Welcome, {name}')\n```\n\nUse the playground on the dashboard to try these snippets.",
+  "youtubeId": "rfscVS0vtbw",
+  "thumbnail": "https://i.ytimg.com/vi/rfscVS0vtbw/hqdefault.jpg"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "ai-1-1",
+  "title": "Prompt engineering essentials",
+  "goals": ["Explain tokens", "Write a system-style instruction", "Constrain output format"],
+  "body": "## Prompting\n\nBe specific about **role**, **task**, **constraints**, and **output format**. Iterate with examples.",
+  "youtubeId": "jHv63Uvk5VA",
+  "thumbnail": "https://i.ytimg.com/vi/jHv63Uvk5VA/hqdefault.jpg"
+}

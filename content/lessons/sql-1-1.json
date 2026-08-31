@@ -1,0 +1,8 @@
+{
+  "id": "sql-1-1",
+  "title": "SQL full course overview",
+  "goals": ["Describe tables and rows", "Write a basic SELECT", "Filter with WHERE"],
+  "body": "## SQL basics\n\n```sql\nSELECT title, level\nFROM courses\nWHERE level = 'Beginner'\nORDER BY title;\n```",
+  "youtubeId": "HXV3zeQKqGY",
+  "thumbnail": "https://i.ytimg.com/vi/HXV3zeQKqGY/hqdefault.jpg"
+}

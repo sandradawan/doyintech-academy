@@ -1,0 +1,8 @@
+{
+  "id": "dk-1-1",
+  "title": "Docker full course intro",
+  "goals": ["Define image vs container", "Run a container", "List why Docker helps teams"],
+  "body": "## Docker\n\n```bash\ndocker run --rm -p 3000:3000 my-app:latest\n```\n\nImages are blueprints; containers are running instances.",
+  "youtubeId": "3c-iBn73dDE",
+  "thumbnail": "https://i.ytimg.com/vi/3c-iBn73dDE/hqdefault.jpg"
+}
