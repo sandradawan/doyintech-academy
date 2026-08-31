@@ -68,6 +68,21 @@ const LESSON_VIDEO: Record<string, string> = {
   "be-2-3": "fgTGADljAeg",
   "git-1-1": "RGOj5yH7evk",
   "git-2-1": "RGOj5yH7evk",
+  "py-1-1": "rfscVS0vtbw",
+  "py-2-1": "rfscVS0vtbw",
+  "hc-1-1": "1Rs2ND1ryYc",
+  "nx-1-1": "ZVBC_EZvnfI",
+  "nx-2-1": "ZVBC_EZvnfI",
+  "sql-1-1": "HXV3zeQKqGY",
+  "sql-2-1": "HXV3zeQKqGY",
+  "dsa-1-1": "8hly31x25IM",
+  "dsa-2-1": "8hly31x25IM",
+  "cy-1-1": "inWWhr5tnEA",
+  "cy-2-1": "inWWhr5tnEA",
+  "rn-1-1": "0-S5a0eXPoc",
+  "dk-1-1": "3c-iBn73dDE",
+  "ai-1-1": "jHv63Uvk5VA",
+  "ai-2-1": "jHv63Uvk5VA",
 };
 
 export default function CourseDetailPage() {
