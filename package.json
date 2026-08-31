@@ -11,6 +11,7 @@
     "content:publish": "node scripts/publish-lesson.mjs"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.1",
     "class-variance-authority": "^0.7.1",
