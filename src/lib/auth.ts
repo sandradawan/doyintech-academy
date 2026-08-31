@@ -138,16 +138,48 @@ export async function markLessonComplete(courseSlug: string, lessonId: string) {
     p_course_slug: courseSlug,
     p_lesson_id: lessonId,
   });
-  return !error;
+  if (error) throw new Error(error.message);
+  return getEnrollment(courseSlug);
 }
 
 export async function completeQuiz(courseSlug: string, score: number) {
   const supabase = createClient() as any;
-  const { data, error } = await supabase.rpc("submit_course_quiz", {
-    p_course_slug: courseSlug,
-    p_score: score,
-  });
-  if (error || !data) return undefined;
+  try {
+    const { data, error } = await supabase.rpc("submit_course_quiz", {
+      p_course_slug: courseSlug,
+      p_score: score,
+    });
+    if (!error && data) return getEnrollment(courseSlug);
+  } catch {
+    /* fall through to direct update */
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return undefined;
+
+  const patch: Record<string, unknown> = { quiz_score: score };
+  if (score >= 60) {
+    const { data: existing } = await supabase
+      .from("enrollments")
+      .select("certificate_id")
+      .eq("user_id", user.id)
+      .eq("course_slug", courseSlug)
+      .maybeSingle();
+    if (!existing?.certificate_id) {
+      const id = `DTA-${courseSlug.slice(0, 3).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+      patch.certificate_id = id;
+      patch.certified_at = new Date().toISOString();
+    }
+  }
+
+  await supabase
+    .from("enrollments")
+    .update(patch)
+    .eq("user_id", user.id)
+    .eq("course_slug", courseSlug);
+
   return getEnrollment(courseSlug);
 }
 
