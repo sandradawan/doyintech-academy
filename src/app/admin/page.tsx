@@ -12,48 +12,56 @@ import {
 } from "lucide-react";
 import { courses } from "@/lib/courses/catalog";
 import { courseLessonCount } from "@/lib/courses/types";
-import { getOverrides, getWaitlist } from "@/lib/admin";
 import {
+  fetchContentOverrides,
+  fetchCrmActivity,
+  fetchCrmPayments,
+  fetchCrmStudents,
+  fetchWaitlistDb,
   formatNgn,
-  getCrmActivity,
-  getCrmPayments,
-  getCrmStudents,
-  paymentStats,
-  seedDemoStudentsIfEmpty,
+  paymentStatsFrom,
   type CrmActivity,
+  type CrmPayment,
 } from "@/lib/admin-crm";
 
 export default function AdminOverviewPage() {
   const [stats, setStats] = useState({
-    students: 0,
-    active: 0,
-    payments: 0,
-    revenue: 0,
-    waitlist: 0,
-    overrides: 0,
-    lessons: 0,
-    courses: 0,
+    students: 0, active: 0, payments: 0, revenue: 0, waitlist: 0, overrides: 0, lessons: 0, courses: 0,
   });
   const [activity, setActivity] = useState<CrmActivity[]>([]);
-  const [recentPay, setRecentPay] = useState<ReturnType<typeof getCrmPayments>>([]);
+  const [recentPay, setRecentPay] = useState<CrmPayment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    seedDemoStudentsIfEmpty();
-    const students = getCrmStudents();
-    const pay = paymentStats();
-    const lessonTotal = courses.reduce((n, c) => n + courseLessonCount(c), 0);
-    setStats({
-      students: students.length,
-      active: students.filter((s) => s.status === "active").length,
-      payments: pay.success,
-      revenue: pay.revenueNgn,
-      waitlist: getWaitlist().length,
-      overrides: getOverrides().length,
-      lessons: lessonTotal,
-      courses: courses.length,
-    });
-    setActivity(getCrmActivity(12));
-    setRecentPay(getCrmPayments().slice(0, 5));
+    let cancelled = false;
+    (async () => {
+      try {
+        const [students, payments, waitlist, overrides, acts] = await Promise.all([
+          fetchCrmStudents(), fetchCrmPayments(), fetchWaitlistDb(), fetchContentOverrides(), fetchCrmActivity(12),
+        ]);
+        if (cancelled) return;
+        const pay = paymentStatsFrom(payments);
+        const lessonTotal = courses.reduce((n, c) => n + courseLessonCount(c), 0);
+        setStats({
+          students: students.length,
+          active: students.filter((s) => s.status === "active").length,
+          payments: pay.success,
+          revenue: pay.revenueNgn,
+          waitlist: waitlist.length,
+          overrides: overrides.length,
+          lessons: lessonTotal,
+          courses: courses.length,
+        });
+        setActivity(acts);
+        setRecentPay(payments.slice(0, 5));
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   const kpis = [
@@ -67,18 +75,17 @@ export default function AdminOverviewPage() {
     <div className="space-y-8">
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight">Overview</h1>
-        <p className="mt-1 text-sm text-muted">
-          Operations snapshot for content, students, and certificate payments.
-        </p>
+        <p className="mt-1 text-sm text-muted">Live data from Supabase (profiles, enrollments, payments, waitlist).</p>
       </div>
-
+      {error ? (
+        <p className="rounded-lg border border-orange/40 bg-orange/10 px-4 py-3 text-sm text-orange">
+          {error} — run the CRM migration SQL and set your user role to admin.
+        </p>
+      ) : null}
+      {loading ? <p className="text-sm text-muted">Loading metrics…</p> : null}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {kpis.map((k) => (
-          <Link
-            key={k.label}
-            href={k.href}
-            className="rounded-xl border border-border bg-surface p-5 transition-colors hover:border-primary/40"
-          >
+          <Link key={k.label} href={k.href} className="rounded-xl border border-border bg-surface p-5 hover:border-primary/40">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold tracking-wide text-muted uppercase">{k.label}</p>
               <k.icon className="size-4 text-primary" />
@@ -88,28 +95,21 @@ export default function AdminOverviewPage() {
           </Link>
         ))}
       </div>
-
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-xl border border-border bg-surface p-5">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-lg font-semibold">Recent payments</h2>
-            <Link href="/admin/payments" className="text-xs font-medium text-primary hover:underline">
-              View all
-            </Link>
+            <Link href="/admin/payments" className="text-xs font-medium text-primary hover:underline">View all</Link>
           </div>
           {recentPay.length === 0 ? (
-            <p className="mt-6 text-sm text-muted">
-              No payments yet. Successful Paystack certificate checkouts appear here.
-            </p>
+            <p className="mt-6 text-sm text-muted">No payments in the database yet.</p>
           ) : (
             <ul className="mt-4 divide-y divide-border">
               {recentPay.map((p) => (
                 <li key={p.id} className="flex items-center justify-between gap-3 py-3 text-sm">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{p.email}</p>
-                    <p className="truncate text-xs text-muted">
-                      {p.certificateId} · {p.courseSlug}
-                    </p>
+                    <p className="truncate text-xs text-muted">{p.certificateId} · {p.courseSlug}</p>
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="font-semibold tabular-nums">{formatNgn(p.amountKobo / 100)}</p>
@@ -120,29 +120,25 @@ export default function AdminOverviewPage() {
             </ul>
           )}
         </section>
-
         <section className="rounded-xl border border-border bg-surface p-5">
           <div className="flex items-center gap-2">
             <TrendingUp className="size-4 text-primary" />
             <h2 className="font-display text-lg font-semibold">Activity</h2>
           </div>
           {activity.length === 0 ? (
-            <p className="mt-6 text-sm text-muted">CRM actions will show up in this feed.</p>
+            <p className="mt-6 text-sm text-muted">No admin activity rows yet.</p>
           ) : (
             <ul className="mt-4 space-y-3">
               {activity.map((a) => (
                 <li key={a.id} className="border-b border-border pb-3 text-sm last:border-0">
                   <p className="text-fg">{a.message}</p>
-                  <p className="mt-0.5 text-xs text-subtle">
-                    {new Date(a.createdAt).toLocaleString()} · {a.type}
-                  </p>
+                  <p className="mt-0.5 text-xs text-subtle">{new Date(a.createdAt).toLocaleString()} · {a.type}</p>
                 </li>
               ))}
             </ul>
           )}
         </section>
       </div>
-
       <section className="rounded-xl border border-border bg-surface p-5">
         <h2 className="font-display text-lg font-semibold">Quick links</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -151,13 +147,8 @@ export default function AdminOverviewPage() {
             { href: "/admin/students", label: "Manage students", icon: Users },
             { href: "/admin/enrollments", label: "Enrollment map", icon: GraduationCap },
           ].map((q) => (
-            <Link
-              key={q.href}
-              href={q.href}
-              className="flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-sm font-medium hover:bg-surface-2"
-            >
-              <q.icon className="size-4 text-primary" />
-              {q.label}
+            <Link key={q.href} href={q.href} className="flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-sm font-medium hover:bg-surface-2">
+              <q.icon className="size-4 text-primary" />{q.label}
             </Link>
           ))}
         </div>
