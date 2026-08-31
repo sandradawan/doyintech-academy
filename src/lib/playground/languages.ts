@@ -2,6 +2,8 @@ export type PlaygroundLanguage = {
   id: string;
   label: string;
   runtime: "browser" | "piston";
+  /** Monaco Editor language id */
+  monaco: string;
   pistonLanguage?: string;
   pistonVersion?: string;
   defaultCode: string;
@@ -10,12 +12,14 @@ export type PlaygroundLanguage = {
 export const PLAYGROUND_LANGUAGES: PlaygroundLanguage[] = [
   {
     id: "html",
+    monaco: "html",
     label: "HTML / CSS / JS",
     runtime: "browser",
     defaultCode: `<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body {\n      font-family: system-ui, sans-serif;\n      display: grid;\n      place-items: center;\n      min-height: 100vh;\n      margin: 0;\n      background: #0b0e14;\n      color: #f1f5f9;\n    }\n    button {\n      background: #3b82f6;\n      color: white;\n      border: 0;\n      padding: 0.75rem 1.25rem;\n      border-radius: 0.5rem;\n      font-weight: 600;\n      cursor: pointer;\n    }\n  </style>\n</head>\n<body>\n  <div>\n    <h1>Hello from Doyintech</h1>\n    <button onclick="greet()">Click me</button>\n    <p id="out"></p>\n  </div>\n  <script>\n    function greet() {\n      document.getElementById("out").textContent = "You ran code in the playground!";\n    }\n  </script>\n</body>\n</html>`,
   },
   {
     id: "javascript",
+    monaco: "javascript",
     label: "JavaScript",
     runtime: "piston",
     pistonLanguage: "javascript",
@@ -24,6 +28,7 @@ export const PLAYGROUND_LANGUAGES: PlaygroundLanguage[] = [
   },
   {
     id: "python",
+    monaco: "python",
     label: "Python",
     runtime: "piston",
     pistonLanguage: "python",
@@ -32,6 +37,7 @@ export const PLAYGROUND_LANGUAGES: PlaygroundLanguage[] = [
   },
   {
     id: "typescript",
+    monaco: "typescript",
     label: "TypeScript",
     runtime: "piston",
     pistonLanguage: "typescript",
@@ -40,6 +46,7 @@ export const PLAYGROUND_LANGUAGES: PlaygroundLanguage[] = [
   },
   {
     id: "java",
+    monaco: "java",
     label: "Java",
     runtime: "piston",
     pistonLanguage: "java",
@@ -48,6 +55,7 @@ export const PLAYGROUND_LANGUAGES: PlaygroundLanguage[] = [
   },
   {
     id: "c",
+    monaco: "c",
     label: "C",
     runtime: "piston",
     pistonLanguage: "c",
@@ -56,6 +64,7 @@ export const PLAYGROUND_LANGUAGES: PlaygroundLanguage[] = [
   },
   {
     id: "cpp",
+    monaco: "cpp",
     label: "C++",
     runtime: "piston",
     pistonLanguage: "c++",
@@ -64,6 +73,7 @@ export const PLAYGROUND_LANGUAGES: PlaygroundLanguage[] = [
   },
   {
     id: "go",
+    monaco: "go",
     label: "Go",
     runtime: "piston",
     pistonLanguage: "go",
@@ -72,6 +82,7 @@ export const PLAYGROUND_LANGUAGES: PlaygroundLanguage[] = [
   },
   {
     id: "php",
+    monaco: "php",
     label: "PHP",
     runtime: "piston",
     pistonLanguage: "php",
@@ -80,6 +91,7 @@ export const PLAYGROUND_LANGUAGES: PlaygroundLanguage[] = [
   },
   {
     id: "ruby",
+    monaco: "ruby",
     label: "Ruby",
     runtime: "piston",
     pistonLanguage: "ruby",
@@ -88,6 +100,7 @@ export const PLAYGROUND_LANGUAGES: PlaygroundLanguage[] = [
   },
   {
     id: "rust",
+    monaco: "rust",
     label: "Rust",
     runtime: "piston",
     pistonLanguage: "rust",
@@ -96,6 +109,7 @@ export const PLAYGROUND_LANGUAGES: PlaygroundLanguage[] = [
   },
   {
     id: "csharp",
+    monaco: "csharp",
     label: "C#",
     runtime: "piston",
     pistonLanguage: "csharp",
