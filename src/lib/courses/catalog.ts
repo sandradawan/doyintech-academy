@@ -2,7 +2,13 @@ import { youtubeThumb } from "@/lib/video-progress";
 import type { Course } from "./types";
 import { courseLessonCount } from "./types";
 
-function L(id: string, title: string, durationMin: number, kind: Course["modules"][0]["lessons"][0]["kind"], summary: string) {
+function L(
+  id: string,
+  title: string,
+  durationMin: number,
+  kind: Course["modules"][0]["lessons"][0]["kind"],
+  summary: string,
+) {
   return { id, title, durationMin, kind, summary };
 }
 
@@ -11,164 +17,605 @@ export const courses: Course[] = [
     slug: "web-foundations",
     thumbnail: youtubeThumb("UB1O30fX-d8", "hq"),
     title: "Web Foundations",
-    tagline: "HTML, CSS, and JavaScript — the three languages of the web.",
-    description: "Structure documents, style layouts, and add behaviour until you can ship a responsive site without a framework.",
+    tagline: "HTML, CSS, and how the browser turns code into pages.",
+    description:
+      "Build a solid mental model of the web: documents, styles, layout, and the tools professionals use every day.",
     level: "Beginner",
-    accent: "from-blue-600 to-cyan-400",
+    accent: "from-sky-600 to-cyan-400",
     hours: 8,
     featured: true,
-    outcomes: ["Build semantic HTML", "Lay out pages with Flexbox and Grid", "Write DOM JavaScript", "Ship a responsive page"],
+    outcomes: [
+      "Structure pages with semantic HTML",
+      "Style layouts with modern CSS",
+      "Use DevTools to debug the DOM",
+      "Ship a responsive landing page",
+    ],
     modules: [
-      { id: "wf-1", title: "How the web works", lessons: [
-        L("wf-1-1", "Browsers, servers, and requests", 8, "video", "URLs, HTTP, and what happens when you hit Enter."),
-        L("wf-1-2", "Your first HTML document", 12, "interactive", "Write a valid page from DOCTYPE to a paragraph."),
-      ]},
-      { id: "wf-2", title: "Structure with HTML", lessons: [
-        L("wf-2-1", "Elements, attributes, and semantics", 14, "text", "Headings, lists, links, and images."),
-        L("wf-2-2", "Forms and accessible labels", 16, "interactive", "Build a contact form a screen reader can use."),
-      ]},
-      { id: "wf-3", title: "Style with CSS", lessons: [
-        L("wf-3-1", "Cascade, box model, and units", 12, "video", "Specificity, margin vs padding, rem."),
-        L("wf-3-2", "Flexbox and Grid studio", 20, "interactive", "Two-column layout and a card grid."),
-        L("wf-3-3", "Responsive layouts", 14, "text", "Mobile-first media queries and fluid type."),
-      ]},
-      { id: "wf-4", title: "Behaviour with JavaScript", lessons: [
-        L("wf-4-1", "The DOM in 10 minutes", 10, "video", "Select, create, and update nodes."),
-        L("wf-4-2", "Capstone: a responsive page", 25, "interactive", "Structure, style, and a mobile nav."),
-        L("wf-4-3", "Web Foundations quiz", 12, "quiz", "Pass at 70% to unlock your certificate."),
-      ]},
+      {
+        id: "wf-1",
+        title: "How the web works",
+        lessons: [
+          L("wf-1-1", "How the web works", 12, "video", "Client, server, and the three core languages."),
+          L("wf-1-2", "Your first HTML page", 18, "interactive", "Headings, paragraphs, links, and images."),
+          L("wf-1-3", "Inspect and understand", 10, "text", "Open DevTools and read the live DOM."),
+        ],
+      },
+      {
+        id: "wf-2",
+        title: "Structure and meaning",
+        lessons: [
+          L("wf-2-1", "Semantic HTML", 14, "text", "header, main, section, and accessible markup."),
+          L("wf-2-2", "Forms that collect data", 16, "interactive", "Inputs, labels, and validation basics."),
+        ],
+      },
+      {
+        id: "wf-3",
+        title: "CSS foundations",
+        lessons: [
+          L("wf-3-1", "CSS cascade and selectors", 14, "video", "Specificity, inheritance, and clean rules."),
+          L("wf-3-2", "Box model and spacing", 12, "text", "Margin, padding, border, and sizing."),
+          L("wf-3-3", "Flexbox layout lab", 20, "interactive", "Build a nav and card row with flex."),
+        ],
+      },
+      {
+        id: "wf-4",
+        title: "Responsive pages",
+        lessons: [
+          L("wf-4-1", "Responsive design", 14, "video", "Mobile-first breakpoints and fluid type."),
+          L("wf-4-2", "Ship a landing page", 22, "interactive", "Hero, features, and footer."),
+          L("wf-4-3", "Web foundations quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
     ],
   },
   {
     slug: "javascript-mastery",
     thumbnail: youtubeThumb("W6NZfCO5SIk", "hq"),
     title: "JavaScript Mastery",
-    tagline: "Modern JS — the language, not the framework.",
-    description: "Own scope, arrays, async, and modules well enough to read production code.",
-    level: "Intermediate",
-    accent: "from-indigo-500 to-blue-400",
+    tagline: "Variables, functions, arrays, and the browser APIs you use daily.",
+    description:
+      "Learn modern JavaScript from first principles so you can read docs, write logic, and wire up interactive UIs.",
+    level: "Beginner",
+    accent: "from-amber-500 to-orange-600",
     hours: 10,
     featured: true,
-    outcomes: ["Use ES modules fluently", "Transform data with map/filter/reduce", "Handle async with promises", "Structure a small app"],
+    outcomes: [
+      "Write clear functions and modules",
+      "Transform data with arrays and objects",
+      "Handle events and the DOM",
+      "Use async/await with confidence",
+    ],
     modules: [
-      { id: "js-1", title: "The language core", lessons: [
-        L("js-1-1", "Values, types, and equality", 12, "video", "Primitives vs objects, == vs ===."),
-        L("js-1-2", "Functions, scope, and closures", 16, "text", "Lexical scope and arrow functions."),
-        L("js-1-3", "Closures in the editor", 18, "interactive", "Counter factory and private cache."),
-      ]},
-      { id: "js-2", title: "Data and collections", lessons: [
-        L("js-2-1", "Arrays and objects as tools", 14, "video", "Spread, rest, destructuring."),
-        L("js-2-2", "Transform a dataset", 20, "interactive", "Filter, map, and reduce a student list."),
-      ]},
-      { id: "js-3", title: "Async JavaScript", lessons: [
-        L("js-3-1", "Promises, async/await, and fetch", 14, "video", "Event loop and a clean fetch wrapper."),
-        L("js-3-2", "Load and render remote data", 18, "interactive", "Loading, success, and failure states."),
-        L("js-3-3", "Modules and a tiny app", 16, "text", "Split code into files with a single entry."),
-        L("js-3-4", "JavaScript Mastery quiz", 12, "quiz", "Pass at 70% to unlock your certificate."),
-      ]},
+      {
+        id: "js-1",
+        title: "Language basics",
+        lessons: [
+          L("js-1-1", "JavaScript in the browser", 16, "video", "Console, scripts, and values."),
+          L("js-1-2", "Variables and types", 14, "text", "let, const, numbers, strings, and booleans."),
+          L("js-1-3", "Functions practice", 18, "interactive", "Parameters, returns, and pure helpers."),
+        ],
+      },
+      {
+        id: "js-2",
+        title: "Data and control flow",
+        lessons: [
+          L("js-2-1", "Arrays and objects", 16, "video", "Map, filter, and structured data."),
+          L("js-2-2", "Conditionals and loops", 14, "interactive", "Decide and iterate without chaos."),
+        ],
+      },
+      {
+        id: "js-3",
+        title: "Async and the DOM",
+        lessons: [
+          L("js-3-1", "Promises and async/await", 16, "video", "Fetch data without blocking the UI."),
+          L("js-3-2", "DOM events lab", 20, "interactive", "Buttons, forms, and live updates."),
+          L("js-3-3", "JavaScript mastery quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
     ],
   },
   {
     slug: "react-essentials",
     thumbnail: youtubeThumb("Tn6-PIqc4UM", "hq"),
     title: "React Essentials",
-    tagline: "Components, state, and hooks — the parts you will use every day.",
-    description: "Think in components, lift state on purpose, and ship a small interactive app.",
+    tagline: "Components, state, and hooks for interactive interfaces.",
+    description:
+      "Build UIs as composable components with state, effects, and clean props — the React mental model teams ship with.",
     level: "Intermediate",
     accent: "from-cyan-500 to-blue-600",
-    hours: 10,
+    hours: 9,
     featured: true,
-    outcomes: ["Design component trees", "Manage state with hooks", "Fetch data with effects", "Build multi-view UIs"],
+    outcomes: [
+      "Model UI as components",
+      "Manage state with hooks",
+      "Fetch data in effects",
+      "Lift state and pass props cleanly",
+    ],
     modules: [
-      { id: "re-1", title: "Thinking in React", lessons: [
-        L("re-1-1", "JSX, props, and composition", 12, "video", "UI as a function of state."),
-        L("re-1-2", "Break a mock into components", 16, "interactive", "Split a course card into pieces."),
-      ]},
-      { id: "re-2", title: "State and events", lessons: [
-        L("re-2-1", "useState without the traps", 14, "text", "Updater functions and lifting state."),
-        L("re-2-2", "A working filter and form", 20, "interactive", "Controlled inputs and derived state."),
-      ]},
-      { id: "re-3", title: "Effects and data", lessons: [
-        L("re-3-1", "useEffect, dependencies, and cleanup", 12, "video", "When an effect is the right tool."),
-        L("re-3-2", "Fetch a course list", 18, "interactive", "Loading, error, and empty states."),
-        L("re-3-3", "Client routing and layout", 14, "text", "Shared chrome and nested views."),
-        L("re-3-4", "React Essentials quiz", 12, "quiz", "Pass at 70% to unlock your certificate."),
-      ]},
+      {
+        id: "re-1",
+        title: "Components first",
+        lessons: [
+          L("re-1-1", "React in one hour", 18, "video", "JSX, components, and props."),
+          L("re-1-2", "Compose a card list", 16, "interactive", "Map data into components."),
+        ],
+      },
+      {
+        id: "re-2",
+        title: "State and events",
+        lessons: [
+          L("re-2-1", "useState patterns", 14, "text", "When state belongs in a component."),
+          L("re-2-2", "Controlled forms", 18, "interactive", "Inputs that mirror React state."),
+        ],
+      },
+      {
+        id: "re-3",
+        title: "Effects and data",
+        lessons: [
+          L("re-3-1", "useEffect and fetching", 16, "video", "Load data after render safely."),
+          L("re-3-2", "Mini dashboard", 22, "interactive", "List, filter, and loading states."),
+          L("re-3-3", "React essentials quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
     ],
   },
   {
     slug: "typescript-for-developers",
     thumbnail: youtubeThumb("30LWjhZzg50", "hq"),
     title: "TypeScript for Developers",
-    tagline: "Types that catch bugs before your users do.",
-    description: "Model data with interfaces and unions, and read compiler errors as instructions.",
+    tagline: "Types that catch bugs before runtime.",
+    description:
+      "Add TypeScript to real projects: types, interfaces, generics, and patterns that scale with your team.",
     level: "Intermediate",
-    accent: "from-sky-600 to-indigo-500",
+    accent: "from-blue-600 to-indigo-500",
     hours: 7,
-    outcomes: ["Annotate functions and objects", "Use unions and narrowing", "Type API responses", "Migrate a JS module"],
+    outcomes: [
+      "Annotate functions and objects",
+      "Model domain data with types",
+      "Use generics without fear",
+      "Migrate a JS module safely",
+    ],
     modules: [
-      { id: "ts-1", title: "Types you will actually use", lessons: [
-        L("ts-1-1", "Why TypeScript, and how tsc works", 10, "video", "Gradual typing and tsconfig."),
-        L("ts-1-2", "Primitives, objects, and interfaces", 14, "text", "type vs interface and optional fields."),
-        L("ts-1-3", "Type a course catalog", 18, "interactive", "Model Course and Lesson."),
-      ]},
-      { id: "ts-2", title: "Unions and real data", lessons: [
-        L("ts-2-1", "Unions, narrowing, and never", 14, "video", "Discriminated unions for lesson kinds."),
-        L("ts-2-2", "Generics without the intimidation", 16, "interactive", "Typed fetch helper and Result type."),
-        L("ts-2-3", "Migrate a module", 16, "text", "Rename to .ts and fix the first errors."),
-        L("ts-2-4", "TypeScript quiz", 12, "quiz", "Pass at 70% to unlock your certificate."),
-      ]},
+      {
+        id: "ts-1",
+        title: "TypeScript basics",
+        lessons: [
+          L("ts-1-1", "Why TypeScript", 14, "video", "Types as documentation that runs."),
+          L("ts-1-2", "Primitives and objects", 14, "text", "Interfaces vs type aliases."),
+          L("ts-1-3", "Type a utility module", 18, "interactive", "Strict functions and return types."),
+        ],
+      },
+      {
+        id: "ts-2",
+        title: "Practical patterns",
+        lessons: [
+          L("ts-2-1", "Unions, narrowings, generics", 16, "video", "Express real-world shapes."),
+          L("ts-2-2", "Type a small API client", 20, "interactive", "Request and response types."),
+          L("ts-2-3", "TypeScript quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
     ],
   },
   {
     slug: "backend-apis-node",
     thumbnail: youtubeThumb("fgTGADljAeg", "hq"),
     title: "Backend APIs with Node",
-    tagline: "REST, validation, and data — the server side of a product.",
-    description: "Design resources, validate input, persist records, and protect routes.",
+    tagline: "HTTP, routes, validation, and auth habits that hold up.",
+    description:
+      "Design and implement JSON APIs with Node: routing, validation, databases, and protecting routes.",
     level: "Intermediate",
-    accent: "from-blue-700 to-cyan-500",
-    hours: 11,
-    outcomes: ["Design REST resources", "Validate at the boundary", "Persist and query records", "Protect routes"],
+    accent: "from-emerald-600 to-teal-500",
+    hours: 9,
+    outcomes: [
+      "Design REST-style endpoints",
+      "Validate input on the server",
+      "Persist enrollments and grades",
+      "Protect routes with sessions",
+    ],
     modules: [
-      { id: "be-1", title: "HTTP as a product surface", lessons: [
-        L("be-1-1", "Methods, status codes, and JSON", 12, "video", "GET vs POST vs PATCH and error shapes."),
-        L("be-1-2", "Your first route", 16, "interactive", "Health check and course list endpoint."),
-      ]},
-      { id: "be-2", title: "Validation and persistence", lessons: [
-        L("be-2-1", "Schemas at the boundary", 14, "text", "Parse input once. Never trust the client."),
-        L("be-2-2", "Create and list enrollments", 20, "interactive", "POST a record, GET it back."),
-        L("be-2-3", "Querying without surprises", 14, "video", "Filters, pagination, safe queries."),
-      ]},
-      { id: "be-3", title: "Auth and production habits", lessons: [
-        L("be-3-1", "Sessions, cookies, and protected routes", 14, "text", "Identity on the server."),
-        L("be-3-2", "Lock a gradebook route", 18, "interactive", "401, 403, and owner-only 200."),
-        L("be-3-3", "Backend APIs quiz", 12, "quiz", "Pass at 70% to unlock your certificate."),
-      ]},
+      {
+        id: "be-1",
+        title: "HTTP and servers",
+        lessons: [
+          L("be-1-1", "APIs and HTTP", 14, "video", "Methods, status codes, and JSON."),
+          L("be-1-2", "Your first route", 16, "interactive", "GET and POST that return data."),
+        ],
+      },
+      {
+        id: "be-2",
+        title: "Data and validation",
+        lessons: [
+          L("be-2-1", "Validation is a boundary", 14, "text", "Parse input once. Never trust the client."),
+          L("be-2-2", "Create and list enrollments", 20, "interactive", "POST a record, GET it back."),
+          L("be-2-3", "Querying without surprises", 14, "video", "Filters, pagination, safe queries."),
+        ],
+      },
+      {
+        id: "be-3",
+        title: "Auth and production habits",
+        lessons: [
+          L("be-3-1", "Sessions, cookies, and protected routes", 14, "text", "Identity on the server."),
+          L("be-3-2", "Lock a gradebook route", 18, "interactive", "401, 403, and owner-only 200."),
+          L("be-3-3", "Backend APIs quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
     ],
   },
   {
     slug: "git-professional-workflow",
     thumbnail: youtubeThumb("RGOj5yH7evk", "hq"),
     title: "Git & Professional Workflow",
-    tagline: "Commits, branches, and pull requests that other people can trust.",
-    description: "Write commits that explain themselves and open PRs that review cleanly.",
+    tagline: "Commits, branches, and pull requests teams can trust.",
+    description:
+      "Write commits that explain themselves and open PRs that review cleanly on GitHub.",
     level: "Beginner",
     accent: "from-slate-600 to-blue-500",
     hours: 5,
-    outcomes: ["Make a clean first commit", "Branch and merge safely", "Write solid pull requests", "Collaborate on GitHub"],
+    outcomes: [
+      "Make a clean first commit",
+      "Branch and merge safely",
+      "Write solid pull requests",
+      "Collaborate on GitHub",
+    ],
     modules: [
-      { id: "git-1", title: "Local Git", lessons: [
-        L("git-1-1", "Snapshots, not folders", 10, "video", "Working tree, staging, and commits."),
-        L("git-1-2", "Your first repository", 14, "interactive", "init, add, commit, log, gitignore."),
-        L("git-1-3", "Branching without fear", 12, "text", "Feature branches and merge commits."),
-      ]},
-      { id: "git-2", title: "GitHub and review", lessons: [
-        L("git-2-1", "Remotes, push, and pull", 12, "video", "origin, upstream, and not losing work."),
-        L("git-2-2", "Open a pull request", 16, "interactive", "PR description and a reviewable diff."),
-        L("git-2-3", "Undo, safely", 12, "text", "restore, revert, rewrite vs record."),
-        L("git-2-4", "Git workflow quiz", 10, "quiz", "Pass at 70% to unlock your certificate."),
-      ]},
+      {
+        id: "git-1",
+        title: "Local Git",
+        lessons: [
+          L("git-1-1", "Snapshots, not folders", 10, "video", "Working tree, staging, and commits."),
+          L("git-1-2", "Your first repository", 14, "interactive", "init, add, commit, log, gitignore."),
+          L("git-1-3", "Branching without fear", 12, "text", "Feature branches and merge commits."),
+        ],
+      },
+      {
+        id: "git-2",
+        title: "GitHub and review",
+        lessons: [
+          L("git-2-1", "Remotes, push, and pull", 12, "video", "origin, upstream, and not losing work."),
+          L("git-2-2", "Open a pull request", 16, "interactive", "PR description and a reviewable diff."),
+          L("git-2-3", "Undo, safely", 12, "text", "restore, revert, rewrite vs record."),
+          L("git-2-4", "Git workflow quiz", 10, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "python-for-beginners",
+    thumbnail: youtubeThumb("rfscVS0vtbw", "hq"),
+    title: "Python for Beginners",
+    tagline: "Readable code for scripts, data, and automation.",
+    description:
+      "Learn Python syntax, data structures, functions, and files so you can automate tasks and prepare for data work.",
+    level: "Beginner",
+    accent: "from-yellow-500 to-green-600",
+    hours: 12,
+    featured: true,
+    outcomes: [
+      "Write Python scripts with confidence",
+      "Use lists, dicts, and loops",
+      "Read and write files",
+      "Solve small problems cleanly",
+    ],
+    modules: [
+      {
+        id: "py-1",
+        title: "Python basics",
+        lessons: [
+          L("py-1-1", "Python full course overview", 20, "video", "Install, REPL, and first program."),
+          L("py-1-2", "Variables and types", 14, "text", "int, float, str, and bool."),
+          L("py-1-3", "Functions lab", 18, "interactive", "Define, call, and return values."),
+        ],
+      },
+      {
+        id: "py-2",
+        title: "Collections and control",
+        lessons: [
+          L("py-2-1", "Lists and loops", 16, "video", "Iterate and transform sequences."),
+          L("py-2-2", "Dicts and conditionals", 16, "interactive", "Lookups and branching logic."),
+        ],
+      },
+      {
+        id: "py-3",
+        title: "Files and projects",
+        lessons: [
+          L("py-3-1", "Working with files", 14, "text", "Read, write, and simple CSV."),
+          L("py-3-2", "Mini CLI tool", 20, "interactive", "Parse args and print a report."),
+          L("py-3-3", "Python quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "html-css-advanced",
+    thumbnail: youtubeThumb("1Rs2ND1ryYc", "hq"),
+    title: "HTML & CSS Advanced",
+    tagline: "Layouts, animations, and production-ready UI polish.",
+    description:
+      "Go beyond basics: Grid, custom properties, accessibility, and motion that feels intentional.",
+    level: "Intermediate",
+    accent: "from-pink-500 to-rose-600",
+    hours: 8,
+    outcomes: [
+      "Build complex layouts with Grid",
+      "Theme with CSS variables",
+      "Animate without jank",
+      "Improve accessibility scores",
+    ],
+    modules: [
+      {
+        id: "hc-1",
+        title: "Modern layout",
+        lessons: [
+          L("hc-1-1", "CSS Grid deep dive", 18, "video", "Tracks, areas, and responsive grids."),
+          L("hc-1-2", "Grid gallery lab", 18, "interactive", "Photo grid that reflows cleanly."),
+        ],
+      },
+      {
+        id: "hc-2",
+        title: "Polish and a11y",
+        lessons: [
+          L("hc-2-1", "Variables, themes, focus", 14, "text", "Design tokens and keyboard paths."),
+          L("hc-2-2", "Micro-interactions", 16, "interactive", "Transitions and prefers-reduced-motion."),
+          L("hc-2-3", "Advanced CSS quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "nextjs-fullstack",
+    thumbnail: youtubeThumb("ZVBC_EZvnfI", "hq"),
+    title: "Next.js Fullstack",
+    tagline: "App Router, server components, and production deploys.",
+    description:
+      "Build fullstack apps with Next.js: routing, server components, server actions, and Vercel deployment.",
+    level: "Intermediate",
+    accent: "from-zinc-700 to-neutral-900",
+    hours: 10,
+    featured: true,
+    outcomes: [
+      "Structure an App Router project",
+      "Mix server and client components",
+      "Mutate data with server actions",
+      "Deploy to production",
+    ],
+    modules: [
+      {
+        id: "nx-1",
+        title: "App Router foundations",
+        lessons: [
+          L("nx-1-1", "Next.js App Router", 18, "video", "Layouts, pages, and nested routes."),
+          L("nx-1-2", "Server vs client components", 14, "text", "When to add 'use client'."),
+          L("nx-1-3", "Build a course list page", 18, "interactive", "Fetch and render on the server."),
+        ],
+      },
+      {
+        id: "nx-2",
+        title: "Data and deploy",
+        lessons: [
+          L("nx-2-1", "Server actions and forms", 16, "video", "Mutations without a separate API."),
+          L("nx-2-2", "Auth-aware dashboard shell", 20, "interactive", "Protect a route and show user state."),
+          L("nx-2-3", "Next.js quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "sql-databases",
+    thumbnail: youtubeThumb("HXV3zeQKqGY", "hq"),
+    title: "SQL & Databases",
+    tagline: "Query, model, and reason about relational data.",
+    description:
+      "Master SELECT, joins, aggregation, and schema design so your apps store data correctly.",
+    level: "Beginner",
+    accent: "from-violet-600 to-purple-500",
+    hours: 9,
+    outcomes: [
+      "Write precise SELECT queries",
+      "Join tables safely",
+      "Aggregate and group results",
+      "Design simple schemas",
+    ],
+    modules: [
+      {
+        id: "sql-1",
+        title: "Query fundamentals",
+        lessons: [
+          L("sql-1-1", "SQL full course overview", 20, "video", "Tables, rows, and SELECT."),
+          L("sql-1-2", "WHERE, ORDER BY, LIMIT", 14, "interactive", "Filter and sort results."),
+        ],
+      },
+      {
+        id: "sql-2",
+        title: "Joins and design",
+        lessons: [
+          L("sql-2-1", "JOIN patterns", 16, "video", "INNER, LEFT, and when to use each."),
+          L("sql-2-2", "GROUP BY and aggregates", 14, "text", "COUNT, SUM, AVG with care."),
+          L("sql-2-3", "Schema for enrollments", 18, "interactive", "Students, courses, progress."),
+          L("sql-2-4", "SQL quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "data-structures-algorithms",
+    thumbnail: youtubeThumb("8hly31x25IM", "hq"),
+    title: "Data Structures & Algorithms",
+    tagline: "Arrays, trees, complexity, and interview-ready problem solving.",
+    description:
+      "Build intuition for Big-O, core data structures, and algorithmic patterns used in interviews and production systems.",
+    level: "Intermediate",
+    accent: "from-indigo-600 to-blue-700",
+    hours: 14,
+    outcomes: [
+      "Analyze time and space complexity",
+      "Implement core structures",
+      "Apply search and sort patterns",
+      "Solve medium interview problems",
+    ],
+    modules: [
+      {
+        id: "dsa-1",
+        title: "Complexity and arrays",
+        lessons: [
+          L("dsa-1-1", "Algorithms course intro", 18, "video", "Big-O and problem framing."),
+          L("dsa-1-2", "Arrays and two pointers", 16, "interactive", "In-place techniques."),
+        ],
+      },
+      {
+        id: "dsa-2",
+        title: "Structures",
+        lessons: [
+          L("dsa-2-1", "Stacks, queues, hash maps", 16, "video", "When each structure wins."),
+          L("dsa-2-2", "Trees and recursion", 16, "text", "DFS, BFS, and call stacks."),
+          L("dsa-2-3", "Solve three classic problems", 22, "interactive", "Practice under constraints."),
+          L("dsa-2-4", "DSA quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "cybersecurity-basics",
+    thumbnail: youtubeThumb("inWWhr5tnEA", "hq"),
+    title: "Cybersecurity Basics",
+    tagline: "Threats, defenses, and secure coding habits.",
+    description:
+      "Understand common attacks, password hygiene, web vulnerabilities, and how to think adversarially as a builder.",
+    level: "Beginner",
+    accent: "from-red-700 to-orange-600",
+    hours: 7,
+    outcomes: [
+      "Name common threat types",
+      "Practice strong auth hygiene",
+      "Spot XSS and injection risks",
+      "Apply least privilege thinking",
+    ],
+    modules: [
+      {
+        id: "cy-1",
+        title: "Threat landscape",
+        lessons: [
+          L("cy-1-1", "Cybersecurity fundamentals", 18, "video", "CIA triad and attacker goals."),
+          L("cy-1-2", "Passwords and phishing", 12, "text", "MFA, managers, and social engineering."),
+        ],
+      },
+      {
+        id: "cy-2",
+        title: "Web security for builders",
+        lessons: [
+          L("cy-2-1", "OWASP top risks overview", 16, "video", "Injection, XSS, broken access control."),
+          L("cy-2-2", "Secure a form endpoint", 18, "interactive", "Validate, escape, and authorize."),
+          L("cy-2-3", "Cybersecurity quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "mobile-react-native",
+    thumbnail: youtubeThumb("0-S5a0eXPoc", "hq"),
+    title: "Mobile with React Native",
+    tagline: "Cross-platform apps with React skills you already know.",
+    description:
+      "Build mobile UIs with React Native: components, navigation, and device APIs for iOS and Android.",
+    level: "Intermediate",
+    accent: "from-fuchsia-600 to-purple-700",
+    hours: 10,
+    outcomes: [
+      "Scaffold a React Native app",
+      "Style with Flexbox on mobile",
+      "Navigate between screens",
+      "Use core device capabilities",
+    ],
+    modules: [
+      {
+        id: "rn-1",
+        title: "React Native basics",
+        lessons: [
+          L("rn-1-1", "React Native crash course", 18, "video", "Expo, components, and platform differences."),
+          L("rn-1-2", "Core components lab", 16, "interactive", "View, Text, Image, ScrollView."),
+        ],
+      },
+      {
+        id: "rn-2",
+        title: "Navigation and polish",
+        lessons: [
+          L("rn-2-1", "Stack and tab navigation", 14, "text", "Routes that feel native."),
+          L("rn-2-2", "Build a mini course app", 22, "interactive", "List, detail, and progress screen."),
+          L("rn-2-3", "React Native quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "devops-docker",
+    thumbnail: youtubeThumb("3c-iBn73dDE", "hq"),
+    title: "DevOps & Docker",
+    tagline: "Containers, images, and deployable environments.",
+    description:
+      "Package apps with Docker, understand images and volumes, and connect services the way modern teams ship.",
+    level: "Intermediate",
+    accent: "from-sky-700 to-blue-800",
+    hours: 8,
+    outcomes: [
+      "Write a practical Dockerfile",
+      "Run multi-container stacks",
+      "Use volumes and networks",
+      "Reason about CI-friendly builds",
+    ],
+    modules: [
+      {
+        id: "dk-1",
+        title: "Containers",
+        lessons: [
+          L("dk-1-1", "Docker full course intro", 18, "video", "Images, containers, and the Docker engine."),
+          L("dk-1-2", "Your first Dockerfile", 16, "interactive", "Build and run a Node app image."),
+        ],
+      },
+      {
+        id: "dk-2",
+        title: "Compose and ops",
+        lessons: [
+          L("dk-2-1", "Compose services", 14, "text", "App + database in one stack."),
+          L("dk-2-2", "Ship a compose stack", 18, "interactive", "Networks, env files, volumes."),
+          L("dk-2-3", "Docker quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "ai-prompt-engineering",
+    thumbnail: youtubeThumb("jHv63Uvk5VA", "hq"),
+    title: "AI & Prompt Engineering",
+    tagline: "Use large language models productively and safely.",
+    description:
+      "Learn how LLMs work at a high level, craft reliable prompts, and integrate AI features into products responsibly.",
+    level: "Beginner",
+    accent: "from-teal-500 to-cyan-600",
+    hours: 6,
+    featured: true,
+    outcomes: [
+      "Explain tokens and context windows",
+      "Write structured prompts",
+      "Chain tasks for better results",
+      "Spot risks and limitations",
+    ],
+    modules: [
+      {
+        id: "ai-1",
+        title: "How AI assistants work",
+        lessons: [
+          L("ai-1-1", "Prompt engineering essentials", 16, "video", "Models, tokens, and system prompts."),
+          L("ai-1-2", "Clear instructions", 12, "text", "Roles, constraints, and output formats."),
+        ],
+      },
+      {
+        id: "ai-2",
+        title: "Practical prompting",
+        lessons: [
+          L("ai-2-1", "Few-shot and chain-of-thought", 14, "video", "Patterns that improve reliability."),
+          L("ai-2-2", "Build a study coach prompt", 18, "interactive", "Turn a syllabus into a tutor."),
+          L("ai-2-3", "AI & prompting quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+        ],
+      },
     ],
   },
 ];
