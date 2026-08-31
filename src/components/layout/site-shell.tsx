@@ -5,15 +5,19 @@ import { usePathname } from "next/navigation";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 
-function isAppRoute(pathname: string) {
-  return pathname.startsWith("/dashboard");
+function isBareRoute(pathname: string) {
+  return (
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/login")
+  );
 }
 
 export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "/";
-  const app = isAppRoute(pathname);
+  const bare = isBareRoute(pathname);
 
-  if (app) {
+  if (bare) {
     return <div className="min-h-dvh bg-bg text-fg">{children}</div>;
   }
 
