@@ -1,4 +1,5 @@
-/** Featured lesson videos + copy for the landing page */
+import { youtubeThumb } from "@/lib/video-progress";
+
 export type LandingVideo = {
   id: string;
   title: string;
@@ -7,6 +8,7 @@ export type LandingVideo = {
   duration: string;
   summary: string;
   youtubeId: string;
+  thumbnail: string;
   topics: string[];
 };
 
@@ -20,6 +22,7 @@ export const landingVideos: LandingVideo[] = [
     summary:
       "How browsers turn tags into a document tree — headings, paragraphs, links, and the skeleton every page needs.",
     youtubeId: "UB1O30fX-d8",
+    thumbnail: youtubeThumb("UB1O30fX-d8"),
     topics: ["HTML", "Semantics", "Beginner"],
   },
   {
@@ -31,6 +34,7 @@ export const landingVideos: LandingVideo[] = [
     summary:
       "Box model, flex, and spacing — the tools you use every day to build clean interfaces without fighting the browser.",
     youtubeId: "1Rs2ND1ryYc",
+    thumbnail: youtubeThumb("1Rs2ND1ryYc"),
     topics: ["CSS", "Flexbox", "Layout"],
   },
   {
@@ -42,6 +46,7 @@ export const landingVideos: LandingVideo[] = [
     summary:
       "Variables, functions, and control flow — the language core before frameworks. Built for people who ship.",
     youtubeId: "W6NZfCO5SIk",
+    thumbnail: youtubeThumb("W6NZfCO5SIk"),
     topics: ["JavaScript", "Functions", "Core"],
   },
   {
@@ -53,6 +58,7 @@ export const landingVideos: LandingVideo[] = [
     summary:
       "UI as a function of state. Props, components, and the mental model you need before hooks go deep.",
     youtubeId: "Tn6-PIqc4UM",
+    thumbnail: youtubeThumb("Tn6-PIqc4UM"),
     topics: ["React", "Components", "State"],
   },
 ];
