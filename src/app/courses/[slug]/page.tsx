@@ -2,29 +2,72 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  ArrowLeft, BookOpen, Check, Clapperboard, Clock, Code2, ListChecks, Lock, Unlock,
+  ArrowLeft,
+  BookOpen,
+  Check,
+  ChevronRight,
+  Clapperboard,
+  Clock,
+  Code2,
+  ListChecks,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import { getCourse } from "@/lib/courses/catalog";
-import type { LessonKind } from "@/lib/courses/types";
+import type { Lesson, LessonKind } from "@/lib/courses/types";
 import { courseLessonCount } from "@/lib/courses/types";
 import {
-  enrollInCourse, getEnrollment, getStudent, markLessonComplete,
-  type Enrollment, type Student,
+  enrollInCourse,
+  getEnrollment,
+  getStudent,
+  markLessonComplete,
+  type Enrollment,
+  type Student,
 } from "@/lib/auth";
 import { QuizPanel } from "@/components/courses/quiz-panel";
 import { LessonContentPanel } from "@/components/courses/lesson-content-panel";
+import { VideoPlayer } from "@/components/media/video-player";
 import {
-  getActiveModuleIndex, getNextIncompleteLesson, isCourseLessonsComplete,
-  isModuleComplete, isModuleUnlocked, moduleProgress,
+  getNextIncompleteLesson,
+  isCourseLessonsComplete,
+  isModuleComplete,
+  isModuleUnlocked,
+  moduleProgress,
 } from "@/lib/progress";
+import { CERT_PASS_SCORE } from "@/lib/certificates";
+import { youtubeThumb } from "@/lib/video-progress";
+import { cn } from "@/lib/utils";
 
 const kindIcon: Record<LessonKind, typeof Clapperboard> = {
-  video: Clapperboard, text: BookOpen, interactive: Code2, quiz: ListChecks,
+  video: Clapperboard,
+  text: BookOpen,
+  interactive: Code2,
+  quiz: ListChecks,
 };
 const kindLabel: Record<LessonKind, string> = {
-  video: "Video", text: "Reading", interactive: "Exercise", quiz: "Quiz",
+  video: "Video",
+  text: "Reading",
+  interactive: "Exercise",
+  quiz: "Quiz",
+};
+
+const LESSON_VIDEO: Record<string, string> = {
+  "wf-1-1": "UB1O30fX-d8",
+  "wf-3-1": "1Rs2ND1ryYc",
+  "wf-4-1": "0eWRW09YTCA",
+  "js-1-1": "W6NZfCO5SIk",
+  "js-2-1": "W6NZfCO5SIk",
+  "js-3-1": "PoRJizdjiFE",
+  "re-1-1": "Tn6-PIqc4UM",
+  "re-3-1": "Tn6-PIqc4UM",
+  "ts-1-1": "30LWjhZzg50",
+  "ts-2-1": "30LWjhZzg50",
+  "be-1-1": "fgTGADljAeg",
+  "be-2-3": "fgTGADljAeg",
+  "git-1-1": "RGOj5yH7evk",
+  "git-2-1": "RGOj5yH7evk",
 };
 
 export default function CourseDetailPage() {
@@ -34,7 +77,8 @@ export default function CourseDetailPage() {
   const course = getCourse(slug);
   const [student, setStudent] = useState<Student | null>(null);
   const [enrollment, setEnrollment] = useState<Enrollment | undefined>();
-  const [justUnlocked, setJustUnlocked] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,215 +101,336 @@ export default function CourseDetailPage() {
     };
   }, [slug]);
 
+  const flatLessons = useMemo(() => {
+    if (!course) return [] as { moduleIndex: number; moduleTitle: string; lesson: Lesson }[];
+    return course.modules.flatMap((mod, moduleIndex) =>
+      mod.lessons.map((lesson) => ({
+        moduleIndex,
+        moduleTitle: mod.title,
+        lesson,
+      })),
+    );
+  }, [course]);
+
+  useEffect(() => {
+    if (!course || !enrollment) return;
+    if (activeLessonId) return;
+    const next = getNextIncompleteLesson(course, enrollment);
+    setActiveLessonId(next?.lesson.id ?? course.modules[0]?.lessons[0]?.id ?? null);
+  }, [course, enrollment, activeLessonId]);
+
   if (!course) {
     return (
       <main className="mx-auto max-w-lg px-4 py-24 text-center">
         <h1 className="font-display text-2xl font-medium">Course not found</h1>
-        <Link href="/courses" className="mt-6 inline-block text-primary">Back to catalog</Link>
+        <Link href="/courses" className="mt-6 inline-block text-primary">
+          Back to catalog
+        </Link>
       </main>
     );
   }
 
-  const resolved = course;
-  const lessons = courseLessonCount(resolved);
-  const activeIndex = getActiveModuleIndex(resolved, enrollment);
-  const nextLesson = getNextIncompleteLesson(resolved, enrollment);
-  const allLessonsDone = isCourseLessonsComplete(resolved, enrollment);
+  const lessonsCount = courseLessonCount(course);
+  const nextLesson = getNextIncompleteLesson(course, enrollment);
+  const allLessonsDone = isCourseLessonsComplete(course, enrollment);
+  const active = flatLessons.find((f) => f.lesson.id === activeLessonId) ?? flatLessons[0];
+  const activeUnlocked =
+    !!enrollment && active && isModuleUnlocked(course, enrollment, active.moduleIndex);
 
   async function handleEnroll() {
-    const s = await getStudent();
-    if (!s) {
+    if (!student) {
       router.push(`/login?next=/courses/${slug}`);
       return;
     }
+    setBusy(true);
     try {
       const e = await enrollInCourse(slug);
       setEnrollment(e);
-    } catch (err) {
-      console.error(err);
+      const first = course.modules[0]?.lessons[0]?.id;
+      if (first) setActiveLessonId(first);
+    } finally {
+      setBusy(false);
     }
   }
 
-  async function handleComplete(moduleIndex: number, lessonId: string) {
-    if (!enrollment || !isModuleUnlocked(resolved, enrollment, moduleIndex)) return;
-    const wasComplete = isModuleComplete(resolved.modules[moduleIndex], enrollment);
-    await markLessonComplete(slug, lessonId);
-    const updated = await getEnrollment(slug);
-    setEnrollment(updated);
-    if (updated && !wasComplete && isModuleComplete(resolved.modules[moduleIndex], updated)) {
-      const next = resolved.modules[moduleIndex + 1];
-      if (next && isModuleUnlocked(resolved, updated, moduleIndex + 1)) {
-        setJustUnlocked(next.title);
-        setTimeout(() => setJustUnlocked(null), 4000);
-      }
+  async function handleComplete(lessonId: string) {
+    if (!enrollment) return;
+    setBusy(true);
+    try {
+      const e = await markLessonComplete(slug, lessonId);
+      setEnrollment(e);
+    } finally {
+      setBusy(false);
     }
   }
 
-  return (
-    <main>
-      <section className={`relative isolate overflow-hidden border-b border-border bg-gradient-to-br ${course.accent}`}>
-        <div className="absolute inset-0 bg-bg/75" />
-        <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-          <Link href="/courses" className="inline-flex items-center gap-2 text-sm text-muted hover:text-fg">
-            <ArrowLeft className="size-4" /> All courses
-          </Link>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <span className="rounded-full bg-surface-2 px-2.5 py-0.5 text-xs font-medium">{course.level}</span>
-            <span className="rounded-full bg-cyan/15 px-2.5 py-0.5 text-xs font-medium text-cyan">Learn as you go</span>
-            <span className="rounded-full bg-cyan/15 px-2.5 py-0.5 text-xs font-medium text-cyan">Certificate</span>
-          </div>
-          <h1 className="mt-4 max-w-3xl font-display text-4xl font-medium tracking-tight sm:text-5xl">{course.title}</h1>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">{course.description}</p>
-          <p className="mt-3 max-w-2xl text-sm text-subtle">
-            Modules unlock in order. Finish every lesson in a module to open the next one.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-5 text-sm text-subtle">
-            <span className="inline-flex items-center gap-1.5"><Clock className="size-4" />{course.hours} hours</span>
-            <span>{lessons} lessons</span>
-            <span>{course.modules.length} modules</span>
-            {enrollment ? (
-              <span className="text-cyan">
-                Active: Module {activeIndex + 1}
-                {nextLesson ? ` · ${nextLesson.lesson.title}` : " · Ready for final quiz"}
-              </span>
-            ) : null}
-          </div>
-          <div className="mt-8 flex flex-wrap gap-3">
-            {enrollment ? (
-              <>
-                <a href={nextLesson ? `#module-${activeIndex}` : "#final-quiz"} className="inline-flex h-12 items-center rounded-lg bg-primary px-6 text-base font-medium text-primary-fg">
-                  {nextLesson ? "Continue learning" : "Take final quiz"}
-                </a>
-                <Link href="/dashboard" className="inline-flex h-12 items-center rounded-lg border border-border px-6 text-base font-medium hover:bg-surface-2">Dashboard</Link>
-              </>
-            ) : (
-              <button type="button" onClick={handleEnroll} className="inline-flex h-12 items-center rounded-lg bg-primary px-6 text-base font-medium text-primary-fg hover:bg-primary/90">
-                {student ? "Enroll in this course" : "Sign in to enroll"}
-              </button>
-            )}
-          </div>
-          {justUnlocked ? (
-            <p className="mt-4 inline-flex items-center gap-2 rounded-md bg-cyan/15 px-3 py-2 text-sm text-cyan">
-              <Unlock className="size-4" /> Module unlocked: {justUnlocked}
-            </p>
-          ) : null}
-        </div>
-      </section>
-
-      <div className="mx-auto grid max-w-6xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_18rem]">
-        <div>
-          <h2 className="font-display text-2xl font-medium tracking-tight">Syllabus</h2>
-          <div className="mt-4 space-y-6">
-            {course.modules.map((mod, index) => {
-              const unlocked = !enrollment || isModuleUnlocked(course, enrollment, index);
-              const complete = enrollment ? isModuleComplete(mod, enrollment) : false;
-              const prog = moduleProgress(mod, enrollment);
-              const isActive = !!enrollment && unlocked && !complete && index === activeIndex;
-              return (
-                <div key={mod.id} id={`module-${index}`} className={`rounded-xl border p-4 ${unlocked ? (isActive ? "border-primary/50 bg-surface" : "border-border bg-surface") : "border-border/60 bg-surface/50 opacity-80"}`}>
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <h3 className="font-display text-lg font-medium">
-                      <span className="mr-2 font-mono text-xs text-subtle">Module {index + 1}</span>{mod.title}
-                    </h3>
-                    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${complete ? "bg-cyan/15 text-cyan" : unlocked ? "bg-primary/15 text-primary" : "bg-surface-2 text-subtle"}`}>
-                      {complete ? <><Check className="size-3" /> Complete</> : unlocked ? <><Unlock className="size-3" /> Open</> : <><Lock className="size-3" /> Locked</>}
-                    </span>
-                  </div>
-                  {enrollment ? (
-                    <div className="mt-3">
-                      <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
-                        <div className={`h-full rounded-full ${unlocked ? "bg-cyan" : "bg-subtle/40"}`} style={{ width: `${prog.percent}%` }} />
-                      </div>
-                      <p className="mt-1.5 text-xs text-subtle">
-                        {prog.done} / {prog.total} lessons{!unlocked ? ` · Finish Module ${index} to unlock` : complete ? " · Module complete" : ""}
-                      </p>
-                    </div>
-                  ) : null}
-                  {!unlocked ? (
-                    <p className="mt-3 flex items-start gap-2 text-sm text-muted">
-                      <Lock className="mt-0.5 size-4 shrink-0 text-subtle" />
-                      Complete every lesson in Module {index} to unlock this module.
-                    </p>
-                  ) : null}
-                  <ul className={`mt-3 space-y-3 ${!unlocked ? "pointer-events-none select-none" : ""}`}>
-                    {mod.lessons.map((lesson) => {
-                      const Icon = kindIcon[lesson.kind];
-                      const done = enrollment?.completedLessons.includes(lesson.id);
-                      return (
-                        <li key={lesson.id} className={`flex gap-3 rounded-lg px-3 py-3 ${unlocked ? "bg-surface-2/60" : "bg-surface-2/30"}`}>
-                          <Icon className={`mt-0.5 size-4 shrink-0 ${unlocked ? "text-cyan" : "text-subtle"}`} />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-baseline justify-between gap-2">
-                              <p className={`text-sm font-medium ${unlocked ? "text-fg" : "text-subtle"}`}>{lesson.title}</p>
-                              <p className="text-xs text-subtle">{kindLabel[lesson.kind]} · {lesson.durationMin} min</p>
-                            </div>
-                            <p className="mt-1 text-sm leading-relaxed text-muted">{lesson.summary}</p>
-                            {enrollment && unlocked ? <LessonContentPanel lessonId={lesson.id} /> : null}
-                            {enrollment && unlocked ? (
-                              <button type="button" onClick={() => handleComplete(index, lesson.id)} disabled={!!done} className={`mt-2 text-xs font-medium ${done ? "text-cyan" : "text-primary hover:underline"}`}>
-                                {done ? "Completed" : "Mark complete"}
-                              </button>
-                            ) : null}
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
-          {enrollment ? (
-            <div className="mt-10" id="final-quiz">
-              {allLessonsDone ? (
-                <QuizPanel courseSlug={slug} />
-              ) : (
-                <div className="rounded-xl border border-border bg-surface p-5">
-                  <h3 className="font-display text-lg font-medium">Final quiz locked</h3>
-                  <p className="mt-2 text-sm text-muted">Complete every module in order. The certification quiz opens when all lessons are done.</p>
-                  {nextLesson ? (
-                    <a href={`#module-${nextLesson.moduleIndex}`} className="mt-4 inline-flex text-sm font-medium text-primary hover:underline">
-                      Continue: {nextLesson.lesson.title}
-                    </a>
-                  ) : null}
-                </div>
-              )}
+  if (!enrollment) {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        <Link href="/courses" className="inline-flex items-center gap-1 text-sm text-muted hover:text-fg">
+          <ArrowLeft className="size-4" /> All courses
+        </Link>
+        <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
+          <div>
+            <p className="text-xs font-semibold tracking-widest text-orange uppercase">{course.level}</p>
+            <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">{course.title}</h1>
+            <p className="mt-3 text-base text-muted">{course.tagline}</p>
+            <p className="mt-4 text-sm leading-relaxed text-muted">{course.description}</p>
+            <div className="mt-6 flex flex-wrap gap-4 text-sm text-muted">
+              <span className="inline-flex items-center gap-1"><Clock className="size-4" /> {course.hours} hours</span>
+              <span>{lessonsCount} lessons</span>
+              <span>{course.modules.length} modules</span>
             </div>
-          ) : null}
-        </div>
-        <aside className="h-fit space-y-4 lg:sticky lg:top-24">
-          <div className="rounded-xl bg-surface p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
-            <h2 className="font-display text-lg font-medium">You will leave able to</h2>
-            <ul className="mt-4 space-y-3">
-              {course.outcomes.map((outcome) => (
-                <li key={outcome} className="flex gap-2 text-sm leading-relaxed text-muted">
-                  <Check className="mt-0.5 size-4 shrink-0 text-cyan" />{outcome}
+            <h2 className="mt-10 font-display text-xl font-semibold">Course outline</h2>
+            <ol className="mt-4 space-y-3">
+              {course.modules.map((mod, i) => (
+                <li key={mod.id} className="rounded-lg border border-border bg-surface p-4">
+                  <p className="text-sm font-semibold">Module {i + 1}: {mod.title}</p>
+                  <ul className="mt-2 space-y-1 text-xs text-muted">
+                    {mod.lessons.map((l) => (
+                      <li key={l.id} className="flex items-center gap-2">
+                        <Lock className="size-3" /> {l.title}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <aside className="h-fit rounded-xl border border-border bg-surface p-5 lg:sticky lg:top-24">
+            {course.thumbnail ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={course.thumbnail} alt="" className="mb-4 aspect-video w-full rounded-lg object-cover" />
+            ) : null}
+            <button
+              type="button"
+              onClick={handleEnroll}
+              disabled={busy}
+              className="flex h-12 w-full items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-fg hover:bg-primary/90 disabled:opacity-60"
+            >
+              {student ? (busy ? "Enrolling…" : "Enroll for free") : "Sign in to enroll"}
+            </button>
+            <p className="mt-3 text-xs text-muted">
+              After enroll: outline, reading + video side by side, then quiz (≥{CERT_PASS_SCORE}%) for certificate. Download requires payment.
+            </p>
+            <ul className="mt-4 space-y-2 text-sm text-muted">
+              {course.outcomes.map((o) => (
+                <li key={o} className="flex gap-2">
+                  <Check className="mt-0.5 size-4 shrink-0 text-primary" /> {o}
                 </li>
               ))}
             </ul>
+          </aside>
+        </div>
+      </main>
+    );
+  }
+
+  const yt =
+    active && (LESSON_VIDEO[active.lesson.id] || (active.lesson.kind === "video" ? "UB1O30fX-d8" : null));
+  const isQuizLesson = active?.lesson.kind === "quiz";
+  const done = active ? enrollment.completedLessons.includes(active.lesson.id) : false;
+
+  return (
+    <div className="min-h-[calc(100vh-4rem)] border-t border-border bg-bg">
+      <div className="border-b border-border bg-surface">
+        <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-3 px-3 py-3 sm:px-4">
+          <Link href="/courses" className="text-muted hover:text-fg">
+            <ArrowLeft className="size-4" />
+          </Link>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-medium text-muted">Doyintech Academy</p>
+            <h1 className="truncate font-display text-sm font-semibold sm:text-base">{course.title}</h1>
           </div>
-          <div className="rounded-xl bg-surface p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
-            <h2 className="font-display text-lg font-medium">Path</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted">
-              Learn as you go: each module stays locked until the previous one is fully complete.
-            </p>
-            {enrollment ? (
-              <ol className="mt-4 space-y-2">
-                {course.modules.map((mod, index) => {
-                  const unlocked = isModuleUnlocked(course, enrollment, index);
-                  const complete = isModuleComplete(mod, enrollment);
-                  return (
-                    <li key={mod.id} className="flex items-center gap-2 text-xs text-muted">
-                      {complete ? <Check className="size-3.5 text-cyan" /> : unlocked ? <Unlock className="size-3.5 text-primary" /> : <Lock className="size-3.5 text-subtle" />}
-                      <span className={complete || unlocked ? "text-fg" : ""}>{index + 1}. {mod.title}</span>
-                    </li>
-                  );
-                })}
-              </ol>
+          <span className="rounded-full bg-surface-2 px-2.5 py-1 text-xs font-medium text-muted">
+            {enrollment.completedLessons.length}/{lessonsCount} lessons
+          </span>
+        </div>
+      </div>
+
+      <div className="mx-auto grid max-w-[1600px] lg:grid-cols-[280px_1fr]">
+        <aside className="max-h-[calc(100vh-8rem)] overflow-y-auto border-b border-border bg-surface lg:sticky lg:top-16 lg:max-h-[calc(100vh-4rem)] lg:border-b-0 lg:border-r">
+          <div className="p-3">
+            <p className="px-2 text-[11px] font-semibold tracking-wider text-subtle uppercase">Course outline</p>
+            <nav className="mt-2 space-y-4" aria-label="Modules">
+              {course.modules.map((mod, mi) => {
+                const unlocked = isModuleUnlocked(course, enrollment, mi);
+                const prog = moduleProgress(mod, enrollment);
+                const modDone = isModuleComplete(mod, enrollment);
+                return (
+                  <div key={mod.id}>
+                    <div className="flex items-center gap-2 px-2 py-1">
+                      {unlocked ? (
+                        modDone ? (
+                          <Check className="size-3.5 text-success" />
+                        ) : (
+                          <Unlock className="size-3.5 text-primary" />
+                        )
+                      ) : (
+                        <Lock className="size-3.5 text-subtle" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-semibold text-fg">
+                          Module {mi + 1}: {mod.title}
+                        </p>
+                        <p className="text-[10px] text-subtle">
+                          {prog.done}/{prog.total}
+                        </p>
+                      </div>
+                    </div>
+                    <ul className="mt-1 space-y-0.5">
+                      {mod.lessons.map((lesson) => {
+                        const Icon = kindIcon[lesson.kind];
+                        const isActive = lesson.id === activeLessonId;
+                        const isDone = enrollment.completedLessons.includes(lesson.id);
+                        const canOpen = unlocked;
+                        return (
+                          <li key={lesson.id}>
+                            <button
+                              type="button"
+                              disabled={!canOpen}
+                              onClick={() => canOpen && setActiveLessonId(lesson.id)}
+                              className={cn(
+                                "flex w-full items-start gap-2 rounded-md px-2 py-2 text-left text-xs transition-colors",
+                                isActive && "bg-primary/10 text-fg",
+                                !isActive && canOpen && "text-muted hover:bg-surface-2 hover:text-fg",
+                                !canOpen && "cursor-not-allowed text-subtle opacity-60",
+                              )}
+                            >
+                              {isDone ? (
+                                <Check className="mt-0.5 size-3.5 shrink-0 text-success" />
+                              ) : (
+                                <Icon className="mt-0.5 size-3.5 shrink-0" />
+                              )}
+                              <span className="min-w-0 flex-1">
+                                <span className="line-clamp-2 font-medium">{lesson.title}</span>
+                                <span className="mt-0.5 block text-[10px] text-subtle">
+                                  {kindLabel[lesson.kind]} · {lesson.durationMin} min
+                                </span>
+                              </span>
+                              {isActive ? <ChevronRight className="size-3.5 shrink-0 text-primary" /> : null}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                );
+              })}
+            </nav>
+            {allLessonsDone ? (
+              <a
+                href="#final-quiz"
+                className="mt-4 flex items-center gap-2 rounded-md bg-orange/10 px-3 py-2 text-xs font-semibold text-orange"
+              >
+                <ListChecks className="size-3.5" /> Final assessment (≥{CERT_PASS_SCORE}%)
+              </a>
             ) : null}
           </div>
         </aside>
+
+        <main className="min-w-0 p-3 sm:p-5 lg:p-6">
+          {active && activeUnlocked ? (
+            <div className="space-y-5">
+              <header>
+                <p className="text-xs font-medium text-muted">
+                  Module {active.moduleIndex + 1} · {active.moduleTitle}
+                </p>
+                <h2 className="mt-1 font-display text-xl font-semibold tracking-tight sm:text-2xl">
+                  {active.lesson.title}
+                </h2>
+                <p className="mt-1 text-sm text-muted">{active.lesson.summary}</p>
+              </header>
+
+              {isQuizLesson ? (
+                <QuizPanel
+                  courseSlug={slug}
+                  courseTitle={course.title}
+                  studentName={student?.name || "Student"}
+                  studentId={student?.id}
+                  title={`Assessment: ${active.lesson.title}`}
+                />
+              ) : (
+                <>
+                  <div className="grid gap-4 xl:grid-cols-2">
+                    <section className="overflow-hidden rounded-xl border border-border bg-surface">
+                      <div className="border-b border-border px-3 py-2 text-xs font-semibold tracking-wide text-muted uppercase">
+                        Video
+                      </div>
+                      {yt ? (
+                        <VideoPlayer
+                          videoId={`course-${active.lesson.id}`}
+                          youtubeId={yt}
+                          title={active.lesson.title}
+                          thumbnailUrl={youtubeThumb(yt)}
+                        />
+                      ) : (
+                        <div className="flex aspect-video items-center justify-center bg-surface-2 text-sm text-muted">
+                          No video for this lesson — use the reading panel.
+                        </div>
+                      )}
+                    </section>
+                    <section className="overflow-hidden rounded-xl border border-border bg-surface">
+                      <div className="border-b border-border px-3 py-2 text-xs font-semibold tracking-wide text-muted uppercase">
+                        Reading & practice
+                      </div>
+                      <div className="max-h-[28rem] overflow-y-auto p-3 sm:max-h-[32rem]">
+                        <LessonContentPanel lessonId={active.lesson.id} />
+                      </div>
+                    </section>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      disabled={busy || done}
+                      onClick={() => handleComplete(active.lesson.id)}
+                      className={cn(
+                        "inline-flex h-11 items-center rounded-md px-4 text-sm font-semibold",
+                        done
+                          ? "bg-success/15 text-success"
+                          : "bg-primary text-primary-fg hover:bg-primary/90",
+                      )}
+                    >
+                      {done ? "Completed" : "Mark lesson complete"}
+                    </button>
+                    {nextLesson && nextLesson.lesson.id !== active.lesson.id ? (
+                      <button
+                        type="button"
+                        onClick={() => setActiveLessonId(nextLesson.lesson.id)}
+                        className="text-sm font-medium text-primary hover:underline"
+                      >
+                        Next: {nextLesson.lesson.title} →
+                      </button>
+                    ) : null}
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-muted">Select an unlocked lesson from the outline.</p>
+          )}
+
+          {allLessonsDone && !isQuizLesson ? (
+            <div className="mt-10 border-t border-border pt-8" id="final-quiz">
+              <QuizPanel
+                courseSlug={slug}
+                courseTitle={course.title}
+                studentName={student?.name || "Student"}
+                studentId={student?.id}
+                title="Final course assessment"
+              />
+            </div>
+          ) : null}
+
+          {!allLessonsDone && nextLesson ? (
+            <p className="mt-8 text-xs text-subtle">
+              Final quiz unlocks when every lesson is complete. Certificate requires ≥{CERT_PASS_SCORE}%
+              on the text assessment; download requires payment.
+            </p>
+          ) : null}
+        </main>
       </div>
-    </main>
+    </div>
   );
 }
