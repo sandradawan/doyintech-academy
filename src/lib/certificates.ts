@@ -1,10 +1,10 @@
 /** Pass mark for module / course certification quizzes (text-based assessment). */
 export const CERT_PASS_SCORE = 60;
 
-/** Certificate download is unlocked only after this fee is marked paid (local until Stripe). */
+/** Certificate download fee (display). Charged via Paystack in NGN. */
 export const CERT_FEE_LABEL = "₦2,500";
 export const CERT_FEE_NOTE =
-  "One-time certificate processing fee. Learning content stays free after enrollment.";
+  "One-time certificate processing fee paid via Paystack. Learning content stays free after enrollment.";
 
 const PAID_KEY = "doyintech-academy-cert-paid";
 
