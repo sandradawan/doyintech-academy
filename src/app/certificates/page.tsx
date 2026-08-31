@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 import { CertificatePreview } from "@/components/certificates/certificate-template";
 
 const rules = [
-  "Finish every module in order \u2014 lessons unlock as you go.",
+  "Finish every module in order — lessons unlock as you go.",
   "Pass the end-of-course quiz at 70% or higher.",
   "We issue a certificate with your name, course, date, and unique ID.",
   "Participation without a passing score is not certified.",
@@ -17,7 +17,7 @@ export default function CertificatesPage() {
         Certificates you can stand behind.
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted">
-        Issued per course after a passing quiz \u2014 designed in the DoyinTech brand: white field, navy
+        Issued per course after a passing quiz — designed in the DoyinTech brand: white field, navy
         corners, gold-orange seals, and a unique certificate ID.
       </p>
 
@@ -47,30 +47,14 @@ export default function CertificatesPage() {
             </Link>
           </div>
         </div>
-
         <div className="rounded-xl border border-border bg-surface p-6">
-          <h2 className="font-display text-xl font-medium">Design notes</h2>
-          <ul className="mt-4 space-y-3 text-sm leading-relaxed text-muted">
-            <li className="flex gap-2">
-              <Check className="mt-0.5 size-4 shrink-0 text-orange" />
-              Formal navy corner frames and gold curves (classic acknowledgment style).
-            </li>
-            <li className="flex gap-2">
-              <Check className="mt-0.5 size-4 shrink-0 text-orange" />
-              Modern wave geometry and dual seals \u2014 orange award + blue DoyinTech mark.
-            </li>
-            <li className="flex gap-2">
-              <Check className="mt-0.5 size-4 shrink-0 text-orange" />
-              White field, black type, blue emphasis, orange accents \u2014 Academy brand system.
-            </li>
-            <li className="flex gap-2">
-              <Check className="mt-0.5 size-4 shrink-0 text-orange" />
-              Printable landscape ratio with unique ID for verification.
-            </li>
+          <h2 className="font-display text-lg font-medium">What is included</h2>
+          <ul className="mt-4 space-y-3 text-sm text-muted">
+            <li className="flex gap-2"><Check className="mt-0.5 size-4 text-cyan" /> Student full name</li>
+            <li className="flex gap-2"><Check className="mt-0.5 size-4 text-cyan" /> Course title and score</li>
+            <li className="flex gap-2"><Check className="mt-0.5 size-4 text-cyan" /> Unique certificate ID</li>
+            <li className="flex gap-2"><Check className="mt-0.5 size-4 text-cyan" /> Issue date</li>
           </ul>
-          <p className="mt-6 text-sm text-subtle">
-            After you pass a quiz, your certificate appears on the dashboard with your real name and ID.
-          </p>
         </div>
       </div>
     </main>

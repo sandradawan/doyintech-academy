@@ -1,25 +1,45 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getQuiz } from "@/lib/admin";
-import { completeQuiz, getEnrollment } from "@/lib/auth";
+import { completeQuiz, getEnrollment, type Enrollment } from "@/lib/auth";
 
 export function QuizPanel({ courseSlug }: { courseSlug: string }) {
   const questions = useMemo(() => getQuiz(courseSlug), [courseSlug]);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<{ score: number; certificateId?: string } | null>(null);
+  const [existing, setExisting] = useState<Enrollment | undefined>();
+  const [submitting, setSubmitting] = useState(false);
 
-  function submit() {
-    let correct = 0;
-    for (const q of questions) {
-      if (answers[q.id] === q.correctIndex) correct += 1;
+  useEffect(() => {
+    let cancelled = false;
+    getEnrollment(courseSlug)
+      .then((e) => {
+        if (!cancelled) setExisting(e);
+      })
+      .catch(() => {
+        if (!cancelled) setExisting(undefined);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [courseSlug]);
+
+  async function submit() {
+    setSubmitting(true);
+    try {
+      let correct = 0;
+      for (const q of questions) {
+        if (answers[q.id] === q.correctIndex) correct += 1;
+      }
+      const score = Math.round((correct / Math.max(questions.length, 1)) * 100);
+      const enrollment = await completeQuiz(courseSlug, score);
+      setResult({ score, certificateId: enrollment?.certificateId });
+      setExisting(enrollment);
+    } finally {
+      setSubmitting(false);
     }
-    const score = Math.round((correct / questions.length) * 100);
-    const enrollment = completeQuiz(courseSlug, score);
-    setResult({ score, certificateId: enrollment?.certificateId });
   }
-
-  const existing = getEnrollment(courseSlug);
 
   return (
     <div className="rounded-xl border border-border bg-surface p-5">
@@ -27,18 +47,29 @@ export function QuizPanel({ courseSlug }: { courseSlug: string }) {
       <p className="mt-1 text-sm text-muted">Pass at 70% to earn your certificate.</p>
       {existing?.quizScore != null ? (
         <p className="mt-4 text-sm text-cyan">
-          Best score on this device: {existing.quizScore}%
+          Best score: {existing.quizScore}%
           {existing.certificateId ? ` · Certificate ${existing.certificateId}` : ""}
         </p>
       ) : null}
       <ol className="mt-6 space-y-6">
         {questions.map((q, i) => (
           <li key={q.id}>
-            <p className="text-sm font-medium text-fg">{i + 1}. {q.prompt}</p>
+            <p className="text-sm font-medium text-fg">
+              {i + 1}. {q.prompt}
+            </p>
             <div className="mt-2 space-y-2">
               {q.choices.map((choice, idx) => (
-                <label key={choice} className="flex cursor-pointer items-start gap-2 rounded-md border border-border px-3 py-2 text-sm text-muted hover:bg-surface-2">
-                  <input type="radio" name={q.id} className="mt-0.5" checked={answers[q.id] === idx} onChange={() => setAnswers((a) => ({ ...a, [q.id]: idx }))} />
+                <label
+                  key={choice}
+                  className="flex cursor-pointer items-start gap-2 rounded-md border border-border px-3 py-2 text-sm text-muted hover:bg-surface-2"
+                >
+                  <input
+                    type="radio"
+                    name={q.id}
+                    className="mt-0.5"
+                    checked={answers[q.id] === idx}
+                    onChange={() => setAnswers((a) => ({ ...a, [q.id]: idx }))}
+                  />
                   {choice}
                 </label>
               ))}
@@ -46,8 +77,13 @@ export function QuizPanel({ courseSlug }: { courseSlug: string }) {
           </li>
         ))}
       </ol>
-      <button type="button" onClick={submit} disabled={Object.keys(answers).length < questions.length} className="mt-6 inline-flex h-11 items-center rounded-md bg-primary px-5 text-sm font-medium text-primary-fg hover:bg-primary/90 disabled:opacity-50">
-        Submit quiz
+      <button
+        type="button"
+        onClick={submit}
+        disabled={submitting || Object.keys(answers).length < questions.length}
+        className="mt-6 inline-flex h-11 items-center rounded-md bg-primary px-5 text-sm font-medium text-primary-fg hover:bg-primary/90 disabled:opacity-50"
+      >
+        {submitting ? "Submitting…" : "Submit quiz"}
       </button>
       {result ? (
         <p className={`mt-4 text-sm ${result.score >= 70 ? "text-cyan" : "text-muted"}`}>
