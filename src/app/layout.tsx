@@ -7,6 +7,20 @@ export const metadata: Metadata = {
   title: "Doyintech Academy — Learn to code. Ship work you can show.",
   description:
     "Online tech academy with short videos, written lessons, interactive exercises, quizzes, and named certificates. A DoyinTech school.",
+  applicationName: "Doyintech Academy",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/brand/logo-mark.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/apple-touch-icon.svg",
+  },
+  manifest: "/manifest.webmanifest",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F97316" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b1220" },
+  ],
 };
 
 const themeBoot = `
@@ -25,6 +39,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="antialiased" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
         <script dangerouslySetInnerHTML={{ __html: themeBoot }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
