@@ -9,13 +9,19 @@
   "lang": "en",
   "icons": [
     {
-      "src": "/brand/logo-mark.svg",
+      "src": "/favicon-light.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/favicon.svg",
+      "src": "/favicon-dark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/logo-mark.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
