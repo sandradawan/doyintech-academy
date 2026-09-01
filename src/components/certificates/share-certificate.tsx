@@ -10,6 +10,7 @@ type Props = {
   score?: number | null;
 };
 
+/** Inline brand icon — lucide-react no longer exports Linkedin */
 function LinkedInIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden fill="currentColor">
