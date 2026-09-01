@@ -14,13 +14,14 @@ import { CourseCard } from "@/components/courses/course-card";
 import { VideoLessonCard } from "@/components/home/video-lesson-card";
 import { WaitlistForm } from "@/components/home/waitlist-form";
 import { HeroSlideshow } from "@/components/home/hero-slideshow";
+import { HeroIntroVideo } from "@/components/home/hero-intro-video";
 import { catalogStats, featuredCourses } from "@/lib/courses/catalog";
 import { landingVideos, learningSteps, testimonials } from "@/lib/content/landing";
 
 export default function HomePage() {
   const featured = featuredCourses();
   const stats = catalogStats();
-  const [heroVideo, ...moreVideos] = landingVideos;
+  const moreVideos = landingVideos;
 
   return (
     <main>
@@ -71,17 +72,9 @@ export default function HomePage() {
             </div>
 
             <div className="animate-slide-up stagger-2">
-              <div className="overflow-hidden rounded-2xl border border-white/15 bg-surface/95 shadow-xl shadow-black/20 backdrop-blur-sm">
-                <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-                  <span className="size-2.5 rounded-full bg-red-400/80" />
-                  <span className="size-2.5 rounded-full bg-amber-400/80" />
-                  <span className="size-2.5 rounded-full bg-emerald-400/80" />
-                  <span className="ml-2 text-xs font-medium text-muted">Featured lesson</span>
-                </div>
-                <VideoLessonCard video={heroVideo} featured />
-              </div>
+              <HeroIntroVideo />
               <p className="mt-3 text-center text-xs text-white/65">
-                Sample lesson video · Full paths unlock inside each course
+                Academy intro · Press play to start
               </p>
             </div>
           </div>
