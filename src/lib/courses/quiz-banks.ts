@@ -68,6 +68,36 @@ export const COURSE_QUIZ_BANKS: Record<string, QuizQuestion[]> = {
     { id: "sql-q7", prompt: "A primary key should be…", choices: ["Nullable and duplicated", "Unique per row", "A CSS class", "Optional always"], correctIndex: 1 },
     { id: "sql-q8", prompt: "LIMIT 10…", choices: ["Deletes 10 tables", "Returns at most 10 rows", "Creates 10 indexes", "Runs 10 times slower always"], correctIndex: 1 },
   ],
+  "typescript-for-developers": [
+    { id: "ts-q1", prompt: "TypeScript's main benefit over plain JavaScript is…", choices: ["Faster network only", "Static types that catch errors before runtime", "Replacing HTML", "Removing CSS"], correctIndex: 1 },
+    { id: "ts-q2", prompt: "Which keyword declares a type alias?", choices: ["class", "type", "module", "var"], correctIndex: 1 },
+    { id: "ts-q3", prompt: "An interface is typically used to…", choices: ["Style components", "Describe the shape of an object", "Query SQL", "Commit Git"], correctIndex: 1 },
+    { id: "ts-q4", prompt: "A union type like string | number means…", choices: ["Always both at once", "Either string or number", "Only null", "Only arrays"], correctIndex: 1 },
+    { id: "ts-q5", prompt: "Generics let you…", choices: ["Write CSS", "Parameterize types for reusable functions/structures", "Delete types", "Skip compilation"], correctIndex: 1 },
+    { id: "ts-q6", prompt: "Narrowing means…", choices: ["Making fonts smaller", "Refining a broad type to a more specific one in a branch", "Minifying JS only", "Closing a file"], correctIndex: 1 },
+    { id: "ts-q7", prompt: "strict mode in tsconfig helps by…", choices: ["Disabling types", "Enabling stronger type checks", "Only formatting code", "Replacing ESLint"], correctIndex: 1 },
+    { id: "ts-q8", prompt: "Typing an API response helps you…", choices: ["Ignore errors", "Know field names and avoid typos at compile time", "Speed up DNS", "Hide network failures"], correctIndex: 1 },
+  ],
+  "nextjs-fullstack": [
+    { id: "nx-q1", prompt: "In the App Router, a layout.tsx file…", choices: ["Only runs on the client", "Wraps nested routes and persists across navigations", "Replaces package.json", "Is a CSS file"], correctIndex: 1 },
+    { id: "nx-q2", prompt: "When do you add 'use client'?", choices: ["On every file always", "When the module needs browser APIs or React state/effects", "Never in Next.js", "Only in API routes"], correctIndex: 1 },
+    { id: "nx-q3", prompt: "Server Components by default…", choices: ["Cannot fetch data", "Run on the server and can fetch without shipping that logic to the browser", "Are only for CSS", "Replace databases"], correctIndex: 1 },
+    { id: "nx-q4", prompt: "Server Actions are useful for…", choices: ["Only static images", "Mutations and form handling without a separate REST handler", "DNS only", "Git commits"], correctIndex: 1 },
+    { id: "nx-q5", prompt: "page.tsx in app/courses/[slug] is…", choices: ["A global CSS rule", "A dynamic route page for one course", "A Paystack key", "An SQL table"], correctIndex: 1 },
+    { id: "nx-q6", prompt: "Protecting a dashboard route usually means…", choices: ["Hiding the nav only", "Checking auth on the server and redirecting if unsigned-in", "Disabling JavaScript", "Using only localStorage"], correctIndex: 1 },
+    { id: "nx-q7", prompt: "Metadata in layout/page exports helps with…", choices: ["Git branching", "SEO and social previews (title/description)", "SQL joins", "Paystack webhooks"], correctIndex: 1 },
+    { id: "nx-q8", prompt: "Nested routes share UI via…", choices: ["Only iframes", "Layouts and optional parallel routes", "CSS !important", "Email only"], correctIndex: 1 },
+  ],
+  "backend-apis-node": [
+    { id: "be-q1", prompt: "HTTP GET is typically used to…", choices: ["Delete permanent data only", "Read resources without side effects", "Always create rows", "Style HTML"], correctIndex: 1 },
+    { id: "be-q2", prompt: "Status 201 usually means…", choices: ["Not found", "Created", "Unauthorized", "Server error"], correctIndex: 1 },
+    { id: "be-q3", prompt: "Status 401 means…", choices: ["OK", "Unauthorized (not authenticated)", "Redirect", "Conflict only"], correctIndex: 1 },
+    { id: "be-q4", prompt: "Validating input on the server is important because…", choices: ["Clients are always trusted", "Clients can be bypassed or malicious", "It replaces TLS", "SQL is optional"], correctIndex: 1 },
+    { id: "be-q5", prompt: "JSON in APIs is commonly used to…", choices: ["Store only images", "Exchange structured data between client and server", "Replace Git", "Compile TypeScript"], correctIndex: 1 },
+    { id: "be-q6", prompt: "Pagination helps by…", choices: ["Loading the entire table always", "Returning limited pages of results", "Deleting indexes", "Disabling caches"], correctIndex: 1 },
+    { id: "be-q7", prompt: "Sessions/cookies on the server help…", choices: ["Style pages", "Remember who the user is across requests", "Generate CSS", "Replace HTTPS"], correctIndex: 1 },
+    { id: "be-q8", prompt: "Status 403 means…", choices: ["Success", "Forbidden (authenticated but not allowed)", "Found", "No content only"], correctIndex: 1 },
+  ],
 };
 
 export function getQuizForCourse(courseSlug: string): QuizQuestion[] | null {
