@@ -9,6 +9,7 @@ function isBareRoute(pathname: string) {
   return (
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/admin") ||
+    pathname.startsWith("/dt-ops-console") ||
     pathname.startsWith("/login")
   );
 }
