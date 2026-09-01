@@ -36,6 +36,7 @@ export function getAllVideoProgress(): VideoProgressRecord[] {
 export function saveVideoProgress(
   videoId: string,
   patch: Partial<Pick<VideoProgressRecord, "percent" | "position" | "duration" | "completed">>,
+  meta?: { courseSlug?: string; lessonId?: string },
 ): VideoProgressRecord {
   const all = readAll();
   const prev = all[videoId];
@@ -56,7 +57,34 @@ export function saveVideoProgress(
   }
   all[videoId] = next;
   writeAll(all);
+
+  if (typeof window !== "undefined") {
+    void syncVideoProgressToServer(next, meta).catch(() => {});
+  }
   return next;
+}
+
+async function syncVideoProgressToServer(
+  rec: VideoProgressRecord,
+  meta?: { courseSlug?: string; lessonId?: string },
+) {
+  try {
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.rpc("upsert_video_progress", {
+      p_video_id: rec.videoId,
+      p_percent: Math.round(rec.percent),
+      p_position: rec.position,
+      p_duration: rec.duration,
+      p_completed: rec.completed,
+      p_course_slug: meta?.courseSlug ?? null,
+      p_lesson_id: meta?.lessonId ?? null,
+    });
+  } catch {
+    /* offline / RPC not migrated yet */
+  }
 }
 
 export function markVideoComplete(videoId: string) {
