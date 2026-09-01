@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/generate-lessons.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "content:status": "node scripts/content-status.mjs",
-    "content:publish": "node scripts/publish-lesson.mjs"
+    "content:publish": "node scripts/publish-lesson.mjs",
+    "content:generate": "node scripts/generate-lessons.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
