@@ -27,6 +27,16 @@ function mapEnrollment(row: EnrollmentRow, completedLessons: string[] = []): Enr
   };
 }
 
+/** Fire-and-forget transactional email via API routes (Resend on server). */
+function notifyEmail(path: string, body: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
+  void fetch(`/api/email/${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).catch(() => {});
+}
+
 export async function getStudent(): Promise<Student | null> {
   const supabase = createClient();
   const {
@@ -58,17 +68,16 @@ export async function signUp(name: string, email: string, password: string) {
     if (error) return { student: null, error: error.message };
     if (!data.user) return { student: null, error: "Sign up failed" };
     const student = await getStudent();
-    return {
-      student:
-        student ??
-        ({
-          id: data.user.id,
-          name: name.trim(),
-          email: email.trim().toLowerCase(),
-          createdAt: new Date().toISOString(),
-        } satisfies Student),
-      error: null,
-    };
+    const resolved =
+      student ??
+      ({
+        id: data.user.id,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        createdAt: new Date().toISOString(),
+      } satisfies Student);
+    notifyEmail("welcome", { email: resolved.email, name: resolved.name });
+    return { student: resolved, error: null };
   } catch (e) {
     return {
       student: null,
@@ -143,7 +152,34 @@ export async function enrollInCourse(courseSlug: string): Promise<Enrollment> {
     p_course_slug: courseSlug,
   });
   if (error) throw new Error(error.message);
-  return mapEnrollment(data as EnrollmentRow, []);
+  const enrollment = mapEnrollment(data as EnrollmentRow, []);
+  try {
+    const student = await getStudent();
+    if (student?.email) {
+      const { getCourse } = await import("@/lib/courses/catalog");
+      const course = getCourse(courseSlug);
+      notifyEmail("enrolled", {
+        email: student.email,
+        name: student.name,
+        courseSlug,
+        courseTitle: course?.title || courseSlug,
+      });
+      try {
+        await supabase.rpc("notify_user", {
+          p_user_id: student.id,
+          p_type: "enrollment",
+          p_title: `Enrolled in ${course?.title || courseSlug}`,
+          p_body: "Your first module is unlocked. Start learning.",
+          p_href: `/courses/${courseSlug}`,
+        });
+      } catch {
+        /* optional */
+      }
+    }
+  } catch {
+    /* email optional */
+  }
+  return enrollment;
 }
 
 export async function markLessonComplete(courseSlug: string, lessonId: string) {
@@ -163,7 +199,27 @@ export async function completeQuiz(courseSlug: string, score: number) {
       p_course_slug: courseSlug,
       p_score: score,
     });
-    if (!error && data) return getEnrollment(courseSlug);
+    if (!error && data) {
+      const enrollment = await getEnrollment(courseSlug);
+      if (enrollment?.certificateId && score >= 60) {
+        try {
+          const student = await getStudent();
+          if (student?.email) {
+            const { getCourse } = await import("@/lib/courses/catalog");
+            const course = getCourse(courseSlug);
+            notifyEmail("certificate", {
+              email: student.email,
+              name: student.name,
+              courseTitle: course?.title || courseSlug,
+              certificateId: enrollment.certificateId,
+            });
+          }
+        } catch {
+          /* optional */
+        }
+      }
+      return enrollment;
+    }
   } catch {
     /* fall through */
   }
@@ -189,7 +245,36 @@ export async function completeQuiz(courseSlug: string, score: number) {
   }
 
   await supabase.from("enrollments").update(patch).eq("user_id", user.id).eq("course_slug", courseSlug);
-  return getEnrollment(courseSlug);
+  const enrollment = await getEnrollment(courseSlug);
+  if (enrollment?.certificateId && score >= 60) {
+    try {
+      const student = await getStudent();
+      if (student?.email) {
+        const { getCourse } = await import("@/lib/courses/catalog");
+        const course = getCourse(courseSlug);
+        notifyEmail("certificate", {
+          email: student.email,
+          name: student.name,
+          courseTitle: course?.title || courseSlug,
+          certificateId: enrollment.certificateId,
+        });
+        try {
+          await supabase.rpc("notify_user", {
+            p_user_id: student.id,
+            p_type: "certificate",
+            p_title: "Certificate unlocked",
+            p_body: `${course?.title || courseSlug} — ID ${enrollment.certificateId}`,
+            p_href: `/certificates?id=${enrollment.certificateId}`,
+          });
+        } catch {
+          /* optional */
+        }
+      }
+    } catch {
+      /* optional */
+    }
+  }
+  return enrollment;
 }
 
 export function progressPercent(enrollment: Enrollment | undefined, totalLessons: number) {
