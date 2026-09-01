@@ -19,15 +19,16 @@ import { Logo } from "@/components/brand/logo";
 import { signIn, signOut, getStudent } from "@/lib/auth";
 import { fetchIsAdmin } from "@/lib/admin-crm";
 import { cn } from "@/lib/utils";
+import { adminHref, ADMIN_PUBLIC_BASE } from "@/lib/admin-path";
 
 const nav = [
-  { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: "/admin/students", label: "Students", icon: Users },
-  { href: "/admin/enrollments", label: "Enrollments", icon: GraduationCap },
-  { href: "/admin/payments", label: "Payments", icon: CreditCard },
-  { href: "/admin/content", label: "Content", icon: BookOpen },
-  { href: "/admin/waitlist", label: "Waitlist", icon: ListOrdered },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: adminHref(""), label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: adminHref("/students"), label: "Students", icon: Users },
+  { href: adminHref("/enrollments"), label: "Enrollments", icon: GraduationCap },
+  { href: adminHref("/payments"), label: "Payments", icon: CreditCard },
+  { href: adminHref("/content"), label: "Content", icon: BookOpen },
+  { href: adminHref("/waitlist"), label: "Waitlist", icon: ListOrdered },
+  { href: adminHref("/settings"), label: "Settings", icon: Settings },
 ] as const;
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -84,7 +85,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   async function logout() {
     await signOut();
     setAuthed(false);
-    router.push("/admin");
+    router.push(ADMIN_PUBLIC_BASE);
   }
 
   if (!ready) {
