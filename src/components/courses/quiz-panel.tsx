@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { completeQuiz, getEnrollment, type Enrollment } from "@/lib/auth";
 import { CERT_PASS_SCORE, isCertPassingScore } from "@/lib/certificates";
 import { CertificateClaim } from "@/components/courses/certificate-claim";
+import { getQuizForCourse } from "@/lib/courses/quiz-banks";
 
 export type QuizQuestion = {
   id: string;
@@ -61,7 +62,7 @@ export function QuizPanel({
   studentName,
   studentId,
   title = "Module / course assessment",
-  questions = DEFAULT_QUESTIONS,
+  questions: questionsProp,
 }: {
   courseSlug: string;
   courseTitle: string;
@@ -70,6 +71,7 @@ export function QuizPanel({
   title?: string;
   questions?: QuizQuestion[];
 }) {
+  const questions = questionsProp ?? getQuizForCourse(courseSlug) ?? DEFAULT_QUESTIONS;
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<{ score: number; certificateId?: string } | null>(null);
   const [existing, setExisting] = useState<Enrollment | undefined>();
@@ -100,6 +102,7 @@ export function QuizPanel({
       const enrollment = await completeQuiz(courseSlug, score);
       setResult({ score, certificateId: enrollment?.certificateId });
       setExisting(enrollment);
+      void recordQuizAttempt(courseSlug, score, isCertPassingScore(score));
     } finally {
       setSubmitting(false);
     }
@@ -166,6 +169,35 @@ export function QuizPanel({
               : ` — Score ${CERT_PASS_SCORE}% or higher to unlock the certificate.`}
           </p>
         ) : null}
+        {result ? (
+          <div className="mt-4 space-y-2 border-t border-border pt-4">
+            <p className="text-xs font-semibold tracking-wide text-muted uppercase">Answer review</p>
+            <ul className="space-y-2">
+              {questions.map((q, i) => {
+                const picked = answers[q.id];
+                const ok = picked === q.correctIndex;
+                return (
+                  <li
+                    key={q.id}
+                    className={`rounded-lg border px-3 py-2 text-xs ${
+                      ok ? "border-success/30 bg-success/5" : "border-red-500/20 bg-red-500/5"
+                    }`}
+                  >
+                    <p className="font-medium text-fg">
+                      {i + 1}. {q.prompt}
+                    </p>
+                    <p className="mt-1 text-muted">
+                      Your answer: {typeof picked === "number" ? q.choices[picked] : "—"}
+                      {!ok ? (
+                        <span className="block text-success">Correct: {q.choices[q.correctIndex]}</span>
+                      ) : null}
+                    </p>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ) : null}
       </div>
 
       {passed ? (
@@ -181,4 +213,24 @@ export function QuizPanel({
       ) : null}
     </div>
   );
+}
+
+async function recordQuizAttempt(courseSlug: string, score: number, passed: boolean) {
+  try {
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("quiz_attempts").insert({
+      user_id: user.id,
+      course_slug: courseSlug,
+      score,
+      passed,
+      answers: [],
+    });
+  } catch {
+    /* table may not exist yet */
+  }
 }
