@@ -1,32 +1,65 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Award, CheckCircle2, XCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCourse } from "@/lib/courses/catalog";
+import { ShareCertificate } from "@/components/certificates/share-certificate";
 
 type Props = { params: Promise<{ id: string }> };
+
+async function loadCert(certId: string) {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.rpc("verify_certificate", { p_certificate_id: certId });
+    if (Array.isArray(data) && data[0]) return data[0];
+    if (data && !Array.isArray(data))
+      return data as {
+        certificate_id: string;
+        course_slug: string;
+        student_name: string;
+        quiz_score: number | null;
+        certified_at: string | null;
+        paid: boolean;
+      };
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const certId = decodeURIComponent(id || "").trim();
+  const row = await loadCert(certId);
+  const name = row?.student_name || "Graduate";
+  const course = row ? getCourse(row.course_slug) : undefined;
+  const courseTitle = course?.title || row?.course_slug || "Doyintech Academy";
+  const score = row?.quiz_score;
+  const title = `${name} · ${courseTitle} certificate`;
+  const description = `Verify this Doyintech Academy certificate${score != null ? ` (score ${score}%)` : ""}.`;
+  const og = `/certificates/og?name=${encodeURIComponent(name)}&course=${encodeURIComponent(courseTitle)}&id=${encodeURIComponent(certId)}${score != null ? `&score=${score}` : ""}`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: og, width: 1200, height: 630, alt: title }],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [og],
+    },
+  };
+}
 
 export default async function VerifyCertificatePage({ params }: Props) {
   const { id } = await params;
   const certId = decodeURIComponent(id || "").trim();
-
-  let row: {
-    certificate_id: string;
-    course_slug: string;
-    student_name: string;
-    quiz_score: number | null;
-    certified_at: string | null;
-    paid: boolean;
-  } | null = null;
-
-  try {
-    const supabase = await createClient();
-    const { data } = await supabase.rpc("verify_certificate", { p_certificate_id: certId });
-    if (Array.isArray(data) && data[0]) row = data[0];
-    else if (data && !Array.isArray(data)) row = data as typeof row;
-  } catch {
-    row = null;
-  }
-
+  const row = await loadCert(certId);
   const course = row ? getCourse(row.course_slug) : undefined;
   const valid = Boolean(row?.certificate_id);
 
@@ -59,31 +92,37 @@ export default async function VerifyCertificatePage({ params }: Props) {
                 <dd className="font-medium">{row.quiz_score != null ? `${row.quiz_score}%` : "—"}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-muted">Issued</dt>
-                <dd className="font-medium">
-                  {row.certified_at ? new Date(row.certified_at).toLocaleDateString() : "—"}
-                </dd>
+                <dt className="text-muted">Certificate ID</dt>
+                <dd className="break-all font-mono text-xs">{row.certificate_id}</dd>
               </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted">ID</dt>
-                <dd className="font-mono text-xs">{row.certificate_id}</dd>
-              </div>
+              {row.certified_at ? (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted">Issued</dt>
+                  <dd className="font-medium">{new Date(row.certified_at).toLocaleDateString()}</dd>
+                </div>
+              ) : null}
             </dl>
+            <ShareCertificate
+              certificateId={row.certificate_id}
+              studentName={row.student_name}
+              courseTitle={course?.title || row.course_slug}
+              score={row.quiz_score}
+            />
           </div>
         ) : (
-          <div className="mt-8">
+          <div className="mt-8 space-y-3">
             <div className="flex items-center justify-center gap-2 text-red-500">
               <XCircle className="size-5" />
-              <span className="text-sm font-semibold">Not found</span>
+              <span className="text-sm font-semibold">Certificate not found</span>
             </div>
-            <p className="mt-2 text-sm text-muted">
-              No certificate matches <code className="text-xs">{certId || "—"}</code>.
+            <p className="text-sm text-muted">
+              Check the ID and try again. IDs are issued after a passing course quiz.
             </p>
           </div>
         )}
 
-        <Link href="/" className="mt-8 inline-block text-sm font-medium text-primary hover:underline">
-          Back to academy
+        <Link href="/courses" className="mt-8 inline-flex text-sm font-semibold text-primary hover:underline">
+          Browse courses
         </Link>
       </div>
     </main>
