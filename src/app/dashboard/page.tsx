@@ -127,6 +127,54 @@ export default function DashboardPage() {
         <p className="mt-1 text-sm text-muted">Pick up where you left off or open the playground.</p>
       </div>
 
+      {(() => {
+        const resume = list
+          .map((e) => {
+            const course = getCourse(e.courseSlug);
+            if (!course) return null;
+            const next = getNextIncompleteLesson(course, e);
+            if (!next) return null;
+            const total = courseLessonCount(course);
+            const pct = progressPercent(e, total);
+            return { e, course, next, pct };
+          })
+          .filter(Boolean)
+          .sort((a, b) => (b?.pct || 0) - (a?.pct || 0))[0] as
+          | {
+              e: Enrollment;
+              course: NonNullable<ReturnType<typeof getCourse>>;
+              next: NonNullable<ReturnType<typeof getNextIncompleteLesson>>;
+              pct: number;
+            }
+          | undefined;
+
+        if (!resume) return null;
+        return (
+          <Link
+            href={`/courses/${resume.course.slug}?lesson=${resume.next.lesson.id}`}
+            className="mb-8 flex flex-col gap-3 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent p-5 transition-colors hover:border-primary/50 sm:flex-row sm:items-center"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold tracking-wider text-primary uppercase">
+                Continue learning
+              </p>
+              <p className="mt-1 font-display text-lg font-semibold">{resume.course.title}</p>
+              <p className="mt-0.5 text-sm text-muted">
+                Next: {resume.next.lesson.title}
+                <span className="text-subtle"> · Module {resume.next.moduleIndex + 1}</span>
+              </p>
+              <div className="mt-3 h-1.5 max-w-xs overflow-hidden rounded-full bg-surface-2">
+                <div className="h-full rounded-full bg-primary" style={{ width: `${resume.pct}%` }} />
+              </div>
+              <p className="mt-1 text-xs text-muted">{resume.pct}% complete</p>
+            </div>
+            <span className="inline-flex h-11 shrink-0 items-center justify-center rounded-md bg-primary px-5 text-sm font-semibold text-primary-fg">
+              Resume →
+            </span>
+          </Link>
+        );
+      })()}
+
       <div className="mb-8 grid gap-3 sm:grid-cols-2">
         <Link
           href="/dashboard/playground"
