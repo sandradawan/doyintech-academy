@@ -1,0 +1,75 @@
+import type { QuizQuestion } from "@/components/courses/quiz-panel";
+
+/** Course-specific assessment banks. */
+export const COURSE_QUIZ_BANKS: Record<string, QuizQuestion[]> = {
+  "web-foundations": [
+    { id: "wf-q1", prompt: "Which language describes the structure and meaning of a web page?", choices: ["CSS", "HTML", "JavaScript", "SQL"], correctIndex: 1 },
+    { id: "wf-q2", prompt: "What does CSS primarily control?", choices: ["Server routes", "Presentation and layout", "Database schema", "Git history"], correctIndex: 1 },
+    { id: "wf-q3", prompt: "Why prefer semantic tags like <main> and <nav>?", choices: ["They make the file smaller only", "Accessibility, SEO, and clearer structure", "They replace CSS", "Browsers ignore them"], correctIndex: 1 },
+    { id: "wf-q4", prompt: "In the CSS box model, which layer sits between content and border?", choices: ["Margin", "Padding", "Outline", "Z-index"], correctIndex: 1 },
+    { id: "wf-q5", prompt: "What does box-sizing: border-box do?", choices: ["Ignores padding entirely", "Includes padding and border inside the element's width", "Only works on flex containers", "Removes margins"], correctIndex: 1 },
+    { id: "wf-q6", prompt: "Which Flexbox property distributes space along the main axis?", choices: ["align-items", "justify-content", "flex-direction only", "z-index"], correctIndex: 1 },
+    { id: "wf-q7", prompt: "What is a mobile-first media query approach?", choices: ["Write desktop CSS first, then delete it", "Base styles for small screens, then enhance with min-width queries", "Never use CSS", "Only use max-width: 320px forever"], correctIndex: 1 },
+    { id: "wf-q8", prompt: "Every form control should have…", choices: ["A random id only", "An associated label", "Inline JavaScript", "No name attribute"], correctIndex: 1 },
+    { id: "wf-q9", prompt: "DevTools Elements panel shows…", choices: ["Only the original HTML file on disk", "The live DOM the browser built", "SQL tables", "Git commits"], correctIndex: 1 },
+    { id: "wf-q10", prompt: "Which is a good landing-page structure?", choices: ["Random divs with no headings", "Header/nav, hero, features, footer with semantic landmarks", "Only images, no text", "A single <canvas> for everything"], correctIndex: 1 },
+  ],
+  "javascript-mastery": [
+    { id: "js-q1", prompt: "Which keyword should you prefer for values that do not get reassigned?", choices: ["var", "let", "const", "static"], correctIndex: 2 },
+    { id: "js-q2", prompt: "What does typeof null return in JavaScript?", choices: ['"null"', '"object"', '"undefined"', '"number"'], correctIndex: 1 },
+    { id: "js-q3", prompt: "Which comparison is safer for equality checks?", choices: ["==", "===", "=", "<>"], correctIndex: 1 },
+    { id: "js-q4", prompt: "What does array.map() return?", choices: ["A single number", "A new array with transformed items", "Nothing (undefined only)", "A DOM node"], correctIndex: 1 },
+    { id: "js-q5", prompt: "array.filter(fn) keeps items where fn returns…", choices: ["false", "true", "null", "a string only"], correctIndex: 1 },
+    { id: "js-q6", prompt: "A pure function…", choices: ["Always writes to the DOM", "Same inputs → same output, no hidden side effects", "Must use async/await", "Cannot take parameters"], correctIndex: 1 },
+    { id: "js-q7", prompt: "What does await do inside an async function?", choices: ["Blocks the entire operating system", "Pauses that function until the Promise settles", "Deletes the Promise", "Converts code to CSS"], correctIndex: 1 },
+    { id: "js-q8", prompt: "addEventListener is used to…", choices: ["Style an element", "Run code when a DOM event happens", "Create a SQL index", "Commit Git changes"], correctIndex: 1 },
+    { id: "js-q9", prompt: "Which structure is best for a list of ordered scores?", choices: ["Object only", "Array", "Function", "CSS class"], correctIndex: 1 },
+    { id: "js-q10", prompt: "fetch() returns a…", choices: ["string", "Promise", "number", "HTMLElement"], correctIndex: 1 },
+  ],
+  "python-for-beginners": [
+    { id: "py-q1", prompt: "Which type represents whole numbers in Python?", choices: ["str", "int", "dict", "bool only"], correctIndex: 1 },
+    { id: "py-q2", prompt: "What does an f-string do?", choices: ["Formats a string with embedded expressions", "Opens a file", "Defines a class", "Imports a module"], correctIndex: 0 },
+    { id: "py-q3", prompt: "Preferred naming style for Python variables?", choices: ["camelCase", "snake_case", "SCREAMING", "kebab-case"], correctIndex: 1 },
+    { id: "py-q4", prompt: "What does range(1, 6) produce when iterated?", choices: ["1 through 6 inclusive", "1 through 5", "0 through 6", "Only 6"], correctIndex: 1 },
+    { id: "py-q5", prompt: "A list comprehension like [n*n for n in nums]…", choices: ["Builds a new list", "Always returns a dict", "Deletes nums", "Only works in JavaScript"], correctIndex: 0 },
+    { id: "py-q6", prompt: "dict.get(\"key\") is safer than dict[\"key\"] because…", choices: ["It is faster always", "It can return a default instead of raising KeyError", "It sorts the dict", "It converts keys to int"], correctIndex: 1 },
+    { id: "py-q7", prompt: "Why use a with block when opening files?", choices: ["It is optional decoration only", "It ensures the file is closed properly", "It encrypts the file", "It uploads to the cloud"], correctIndex: 1 },
+    { id: "py-q8", prompt: "def grade(score: int) -> str: declares…", choices: ["A variable named grade", "A function with parameter and return type hints", "A SQL query", "A CSS rule"], correctIndex: 1 },
+    { id: "py-q9", prompt: "sys.argv is used to…", choices: ["Style the terminal", "Read command-line arguments", "Connect to Postgres", "Render HTML"], correctIndex: 1 },
+    { id: "py-q10", prompt: "Which is a boolean value in Python?", choices: ["true", "True", "TRUE", "yes"], correctIndex: 1 },
+  ],
+  "react-essentials": [
+    { id: "re-q1", prompt: "A React component is best described as…", choices: ["A CSS file only", "A reusable piece of UI driven by props and state", "A SQL table", "A Git branch"], correctIndex: 1 },
+    { id: "re-q2", prompt: "Props are…", choices: ["Mutable internal state only", "Inputs passed into a component from its parent", "Database rows", "CSS variables only"], correctIndex: 1 },
+    { id: "re-q3", prompt: "useState is used to…", choices: ["Fetch CSS", "Hold local component state that can change over time", "Define routes", "Commit Git changes"], correctIndex: 1 },
+    { id: "re-q4", prompt: "A controlled input means…", choices: ["The DOM owns the value only", "React state is the source of truth for the input value", "The input cannot change", "It must be type=password"], correctIndex: 1 },
+    { id: "re-q5", prompt: "useEffect runs…", choices: ["Only during server SQL queries", "After render, for side effects like fetching", "Before the HTML file is saved", "Instead of return JSX"], correctIndex: 1 },
+    { id: "re-q6", prompt: "When mapping a list to components you should provide…", choices: ["No key", "A stable unique key", "Only inline styles", "A random key every render"], correctIndex: 1 },
+    { id: "re-q7", prompt: "JSX must…", choices: ["Return multiple root siblings without a parent in older rules", "Express UI structure that compiles to React elements", "Be written in a .css file", "Never use expressions"], correctIndex: 1 },
+    { id: "re-q8", prompt: "Lifting state up means…", choices: ["Moving state to a common parent so siblings can share it", "Deleting state", "Putting state only in CSS", "Using localStorage only"], correctIndex: 0 },
+  ],
+  "git-professional-workflow": [
+    { id: "git-q1", prompt: "Git primarily tracks…", choices: ["Only file sizes", "Snapshots of your project over time", "CPU usage", "CSS specificity"], correctIndex: 1 },
+    { id: "git-q2", prompt: "What does git add do?", choices: ["Pushes to GitHub", "Stages changes for the next commit", "Deletes the repo", "Runs tests"], correctIndex: 1 },
+    { id: "git-q3", prompt: "A good commit message should…", choices: ["Say only 'update'", "Explain why the change exists in clear language", "Be empty", "Include the full diff only"], correctIndex: 1 },
+    { id: "git-q4", prompt: "A branch is…", choices: ["A separate computer", "A movable pointer to a series of commits", "A CSS media query", "A SQL JOIN"], correctIndex: 1 },
+    { id: "git-q5", prompt: "git push uploads commits to a…", choices: ["local only folder", "remote such as origin", "browser cache", "DNS server"], correctIndex: 1 },
+    { id: "git-q6", prompt: "A pull request is mainly for…", choices: ["Hiding code forever", "Proposing and reviewing changes before merging", "Formatting CSS", "Paying certificates"], correctIndex: 1 },
+    { id: "git-q7", prompt: "Which is safer for undoing a public commit already shared?", choices: ["git push --force always", "git revert (new commit that undoes)", "Delete .git", "Ignore it"], correctIndex: 1 },
+    { id: "git-q8", prompt: ".gitignore is used to…", choices: ["Style ignored files", "Keep secrets and build artifacts out of commits", "Speed up JavaScript", "Replace branching"], correctIndex: 1 },
+  ],
+  "sql-databases": [
+    { id: "sql-q1", prompt: "SELECT is used to…", choices: ["Delete a database", "Read rows from tables", "Style HTML", "Commit Git"], correctIndex: 1 },
+    { id: "sql-q2", prompt: "WHERE filters…", choices: ["Columns only", "Rows based on a condition", "Only table names", "Indexes only"], correctIndex: 1 },
+    { id: "sql-q3", prompt: "ORDER BY…", choices: ["Deletes rows", "Sorts the result set", "Creates a user", "Runs JavaScript"], correctIndex: 1 },
+    { id: "sql-q4", prompt: "INNER JOIN returns…", choices: ["All rows from both tables always", "Only rows with matching keys in both tables", "No rows ever", "Only column names"], correctIndex: 1 },
+    { id: "sql-q5", prompt: "LEFT JOIN keeps…", choices: ["Only right table orphans", "All left rows, matched right data or NULL", "Duplicates only", "Nothing"], correctIndex: 1 },
+    { id: "sql-q6", prompt: "GROUP BY is typically used with…", choices: ["Git branches", "Aggregate functions like COUNT or SUM", "CSS flex", "React props"], correctIndex: 1 },
+    { id: "sql-q7", prompt: "A primary key should be…", choices: ["Nullable and duplicated", "Unique per row", "A CSS class", "Optional always"], correctIndex: 1 },
+    { id: "sql-q8", prompt: "LIMIT 10…", choices: ["Deletes 10 tables", "Returns at most 10 rows", "Creates 10 indexes", "Runs 10 times slower always"], correctIndex: 1 },
+  ],
+};
+
+export function getQuizForCourse(courseSlug: string): QuizQuestion[] | null {
+  return COURSE_QUIZ_BANKS[courseSlug] ?? null;
+}
