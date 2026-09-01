@@ -7,8 +7,8 @@ import {
   CERT_FEE_LABEL,
   CERT_FEE_NOTE,
   CERT_PASS_SCORE,
-  isCertificatePaid,
   isCertPassingScore,
+  resolveCertificatePaid,
 } from "@/lib/certificates";
 import { getStudent } from "@/lib/auth";
 
@@ -39,9 +39,19 @@ export function CertificateClaim({
   const unlocked = isCertPassingScore(quizScore) && Boolean(certificateId);
 
   useEffect(() => {
-    if (unlocked) {
-      setPaid(isCertificatePaid(studentId, courseSlug, certificateId));
-    }
+    if (!unlocked) return;
+    let cancelled = false;
+    (async () => {
+      const ok = await resolveCertificatePaid({
+        userId: studentId,
+        courseSlug,
+        certificateId,
+      });
+      if (!cancelled) setPaid(ok);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [unlocked, studentId, courseSlug, certificateId]);
 
   if (!isCertPassingScore(quizScore)) {
