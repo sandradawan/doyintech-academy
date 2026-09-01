@@ -11,6 +11,7 @@ import {
   resolveCertificatePaid,
 } from "@/lib/certificates";
 import { getStudent } from "@/lib/auth";
+import { ShareCertificate } from "@/components/certificates/share-certificate";
 
 export function CertificateClaim({
   studentName,
@@ -196,6 +197,15 @@ export function CertificateClaim({
       >
         <CertificateTemplate data={data} />
       </div>
+
+      {paid ? (
+        <ShareCertificate
+          certificateId={certificateId}
+          studentName={studentName}
+          courseTitle={courseTitle}
+          score={quizScore}
+        />
+      ) : null}
     </div>
   );
 }
