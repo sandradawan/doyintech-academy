@@ -34,3 +34,31 @@ export function markCertificatePaid(userId: string | undefined, courseSlug: stri
 export function isCertPassingScore(score: number | undefined | null) {
   return typeof score === "number" && score >= CERT_PASS_SCORE;
 }
+
+/** Prefer DB payment record; fall back to localStorage. */
+export async function resolveCertificatePaid(opts: {
+  userId?: string;
+  courseSlug: string;
+  certificateId?: string;
+}): Promise<boolean> {
+  if (isCertificatePaid(opts.userId, opts.courseSlug, opts.certificateId)) return true;
+  if (!opts.certificateId || typeof window === "undefined") return false;
+  try {
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("payments")
+      .select("id")
+      .eq("certificate_id", opts.certificateId)
+      .eq("status", "success")
+      .limit(1)
+      .maybeSingle();
+    if (data) {
+      markCertificatePaid(opts.userId, opts.courseSlug, opts.certificateId);
+      return true;
+    }
+  } catch {
+    /* offline / RLS */
+  }
+  return false;
+}
