@@ -1,0 +1,17 @@
+{
+  "name": "Doyintech Academy",
+  "short_name": "Doyintech",
+  "description": "Learn to code with videos, practice, quizzes, and certificates.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#2563eb",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}

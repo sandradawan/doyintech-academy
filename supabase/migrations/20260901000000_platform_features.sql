@@ -1,0 +1,2 @@
+-- see repo file for full migration: video_progress, notifications, lesson_comments, quiz_attempts, verify_certificate, upsert_video_progress
+-- Run this file in Supabase SQL Editor
