@@ -6,6 +6,8 @@ import { fetchCrmStudents, setStudentStatusDb, type CrmStudent } from "@/lib/adm
 import { getCourse } from "@/lib/courses/catalog";
 import { PaginationBar, usePagedItems } from "@/components/admin/pagination";
 import { cn } from "@/lib/utils";
+import { useRealtimeSync } from "@/lib/realtime";
+import { LiveBadge } from "@/components/admin/live-badge";
 
 const PAGE_SIZE = 15;
 
@@ -16,22 +18,31 @@ export default function AdminStudentsPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [live, setLive] = useState(true);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
 
-  async function refresh() {
-    setLoading(true);
+  async function refresh(silent = false) {
+    if (!silent) setLoading(true);
     try {
       setStudents(await fetchCrmStudents());
       setError("");
+      setLive(true);
+      setLastSync(new Date());
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load students");
+      setLive(false);
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, []);
+
+  useRealtimeSync(["profiles", "enrollments"], () => {
+    void refresh(true);
+  });
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -67,7 +78,7 @@ export default function AdminStudentsPage() {
   async function changeStatus(id: string, status: CrmStudent["status"]) {
     try {
       await setStudentStatusDb(id, status);
-      await refresh();
+      await refresh(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Update failed");
     }
@@ -75,9 +86,12 @@ export default function AdminStudentsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">Students</h1>
-        <p className="mt-1 text-sm text-muted">Profiles, enrollments, and account status</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">Students</h1>
+          <p className="mt-1 text-sm text-muted">Profiles, enrollments, and account status</p>
+        </div>
+        <LiveBadge live={live && !error} lastSync={lastSync} />
       </div>
       {error ? (
         <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-500">{error}</p>
