@@ -52,7 +52,9 @@ export type ContentOverrideRow = {
   title?: string;
   summary?: string;
   videoUrl?: string;
+  youtubeId?: string;
   body?: string;
+  quizJson?: unknown[];
   updatedAt: string;
 };
 
@@ -227,7 +229,9 @@ export async function fetchContentOverrides(): Promise<ContentOverrideRow[]> {
     title: o.title ?? undefined,
     summary: o.summary ?? undefined,
     videoUrl: o.video_url ?? undefined,
+    youtubeId: o.youtube_id ?? undefined,
     body: o.body ?? undefined,
+    quizJson: Array.isArray(o.quiz_json) ? o.quiz_json : undefined,
     updatedAt: o.updated_at,
   }));
 }
@@ -238,7 +242,9 @@ export async function saveContentOverrideDb(input: {
   title?: string;
   summary?: string;
   videoUrl?: string;
+  youtubeId?: string;
   body?: string;
+  quizJson?: unknown[];
 }) {
   const supabase = sb();
   const {
@@ -251,7 +257,9 @@ export async function saveContentOverrideDb(input: {
       title: input.title ?? null,
       summary: input.summary ?? null,
       video_url: input.videoUrl ?? null,
+      youtube_id: input.youtubeId ?? null,
       body: input.body ?? null,
+      quiz_json: input.quizJson ?? [],
       updated_by: user?.id ?? null,
       updated_at: new Date().toISOString(),
     },
