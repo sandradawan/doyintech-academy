@@ -4,7 +4,7 @@ import { CertificatePreview } from "@/components/certificates/certificate-templa
 
 const rules = [
   "Finish every module in order — lessons unlock as you go.",
-  "Pass the end-of-course quiz at 70% or higher.",
+  "Pass the end-of-course quiz at 60% or higher.",
   "We issue a certificate with your name, course, date, and unique ID.",
   "Participation without a passing score is not certified.",
 ];
@@ -41,6 +41,9 @@ export default function CertificatesPage() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link href="/courses" className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-fg">
               Choose a course
+            </Link>
+            <Link href="/certificates/verify" className="inline-flex h-11 items-center justify-center rounded-md border border-border px-4 text-sm font-medium">
+              Verify a certificate
             </Link>
             <Link href="/login" className="inline-flex h-11 items-center justify-center rounded-md border border-border px-4 text-sm font-medium">
               Create student account
