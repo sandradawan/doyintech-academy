@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { CourseCard } from "@/components/courses/course-card";
 import { courses, catalogStats } from "@/lib/courses/catalog";
@@ -9,16 +10,37 @@ import type { CourseLevel } from "@/lib/courses/types";
 const levels: Array<"All" | CourseLevel> = ["All", "Beginner", "Intermediate"];
 
 export default function CoursesPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto max-w-7xl px-4 py-12 text-sm text-muted sm:px-6">Loading catalog…</main>
+      }
+    >
+      <CoursesCatalog />
+    </Suspense>
+  );
+}
+
+function CoursesCatalog() {
+  const searchParams = useSearchParams();
   const [level, setLevel] = useState<"All" | CourseLevel>("All");
   const [q, setQ] = useState("");
   const stats = catalogStats();
+
+  // Sync from header search: /courses?q=python
+  useEffect(() => {
+    const fromUrl = searchParams.get("q") || "";
+    setQ(fromUrl);
+  }, [searchParams]);
 
   const visible = useMemo(() => {
     const query = q.trim().toLowerCase();
     return courses.filter((c) => {
       if (level !== "All" && c.level !== level) return false;
       if (!query) return true;
-      const hay = [c.title, c.tagline, c.description, c.slug, ...c.outcomes].join(" ").toLowerCase();
+      const hay = [c.title, c.tagline, c.description, c.slug, c.level, ...c.outcomes]
+        .join(" ")
+        .toLowerCase();
       return hay.includes(query);
     });
   }, [level, q]);
