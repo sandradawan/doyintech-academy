@@ -101,7 +101,17 @@ export default async function VerifyCertificatePage({ params }: Props) {
                   <dd className="font-medium">{new Date(row.certified_at).toLocaleDateString()}</dd>
                 </div>
               ) : null}
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted">Payment</dt>
+                <dd className="font-medium">{row.paid ? "Verified paid" : "Quiz only"}</dd>
+              </div>
             </dl>
+            <p className="text-center text-xs text-muted">
+              Public link:{" "}
+              <span className="break-all font-mono text-[11px] text-fg">
+                /certificates/verify/{row.certificate_id}
+              </span>
+            </p>
             <ShareCertificate
               certificateId={row.certificate_id}
               studentName={row.student_name}
@@ -121,7 +131,11 @@ export default async function VerifyCertificatePage({ params }: Props) {
           </div>
         )}
 
-        <Link href="/courses" className="mt-8 inline-flex text-sm font-semibold text-primary hover:underline">
+        <Link href="/certificates/verify" className="mt-6 inline-flex text-sm font-semibold text-primary hover:underline">
+          Verify another ID
+        </Link>
+        <br />
+        <Link href="/courses" className="mt-3 inline-flex text-sm font-semibold text-primary hover:underline">
           Browse courses
         </Link>
       </div>
