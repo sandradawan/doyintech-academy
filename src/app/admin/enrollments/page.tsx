@@ -7,6 +7,8 @@ import { courseLessonCount } from "@/lib/courses/types";
 import { fetchEnrollmentMap } from "@/lib/admin-crm";
 import { PaginationBar, usePagedItems } from "@/components/admin/pagination";
 import { cn } from "@/lib/utils";
+import { useRealtimeSync } from "@/lib/realtime";
+import { LiveBadge } from "@/components/admin/live-badge";
 
 type Row = { courseSlug: string; userId: string; studentName: string; studentEmail: string };
 
@@ -19,29 +21,37 @@ export default function AdminEnrollmentsPage() {
   const [q, setQ] = useState("");
   const [selectedSlug, setSelectedSlug] = useState<string | "all">("all");
   const [page, setPage] = useState(1);
+  const [live, setLive] = useState(true);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+
+  async function load(silent = false) {
+    if (!silent) setLoading(true);
+    try {
+      setRows(await fetchEnrollmentMap());
+      setError("");
+      setLive(true);
+      setLastSync(new Date());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load enrollments");
+      setLive(false);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    (async () => {
-      try {
-        setRows(await fetchEnrollmentMap());
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Failed to load enrollments");
-      } finally {
-        setLoading(false);
-      }
-    })();
+    void load();
   }, []);
+
+  useRealtimeSync(["enrollments", "profiles"], () => {
+    void load(true);
+  });
 
   const byCourse = useMemo(() => {
     return courses
       .map((c) => {
         const enrolled = rows.filter((r) => r.courseSlug === c.slug);
-        return {
-          course: c,
-          count: enrolled.length,
-          students: enrolled,
-          lessons: courseLessonCount(c),
-        };
+        return { course: c, count: enrolled.length, students: enrolled, lessons: courseLessonCount(c) };
       })
       .sort((a, b) => b.count - a.count);
   }, [rows]);
@@ -72,17 +82,16 @@ export default function AdminEnrollmentsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">Enrollments</h1>
-        <p className="mt-1 text-sm text-muted">
-          Live from Supabase · course demand and student roster
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">Enrollments</h1>
+          <p className="mt-1 text-sm text-muted">Realtime Supabase sync · course demand and student roster</p>
+        </div>
+        <LiveBadge live={live && !error} lastSync={lastSync} />
       </div>
 
       {error ? (
-        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-500">
-          {error}
-        </p>
+        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-500">{error}</p>
       ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -100,15 +109,9 @@ export default function AdminEnrollmentsPage() {
             const max = Math.max(topCourse?.count || 1, 1);
             const pct = Math.round((count / max) * 100);
             return (
-              <button
-                key={course.slug}
-                type="button"
-                onClick={() => setSelectedSlug(active ? "all" : course.slug)}
-                className={cn(
-                  "rounded-xl border bg-surface p-4 text-left transition-colors",
-                  active ? "border-primary ring-1 ring-primary/30" : "border-border hover:border-primary/40",
-                )}
-              >
+              <button key={course.slug} type="button" onClick={() => setSelectedSlug(active ? "all" : course.slug)}
+                className={cn("rounded-xl border bg-surface p-4 text-left transition-colors",
+                  active ? "border-primary ring-1 ring-primary/30" : "border-border hover:border-primary/40")}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="truncate font-display text-sm font-semibold">{course.title}</p>
@@ -134,22 +137,15 @@ export default function AdminEnrollmentsPage() {
           <div>
             <h2 className="font-display text-lg font-semibold">Student roster</h2>
             <p className="text-xs text-muted">
-              {selectedSlug === "all"
-                ? "All enrollments"
-                : courses.find((c) => c.slug === selectedSlug)?.title || selectedSlug}
+              {selectedSlug === "all" ? "All enrollments" : courses.find((c) => c.slug === selectedSlug)?.title || selectedSlug}
             </p>
           </div>
           <div className="relative w-full sm:max-w-xs">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search name or email…"
-              className="h-10 w-full rounded-md border border-border bg-bg pr-3 pl-10 text-sm outline-none focus:border-primary"
-            />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name or email…"
+              className="h-10 w-full rounded-md border border-border bg-bg pr-3 pl-10 text-sm outline-none focus:border-primary" />
           </div>
         </div>
-
         {loading ? (
           <p className="p-8 text-center text-sm text-muted">Loading enrollments…</p>
         ) : filteredStudents.length === 0 ? (
@@ -173,9 +169,7 @@ export default function AdminEnrollmentsPage() {
                         <td className="px-4 py-3 font-medium">{r.studentName}</td>
                         <td className="px-4 py-3 text-muted">{r.studentEmail || "—"}</td>
                         <td className="px-4 py-3">
-                          <span className="rounded-md bg-surface-2 px-2 py-0.5 text-xs font-medium">
-                            {course?.title || r.courseSlug}
-                          </span>
+                          <span className="rounded-md bg-surface-2 px-2 py-0.5 text-xs font-medium">{course?.title || r.courseSlug}</span>
                         </td>
                       </tr>
                     );
@@ -183,13 +177,7 @@ export default function AdminEnrollmentsPage() {
                 </tbody>
               </table>
             </div>
-            <PaginationBar
-              page={safePage}
-              totalPages={totalPages}
-              total={filteredStudents.length}
-              pageSize={PAGE_SIZE}
-              onPageChange={setPage}
-            />
+            <PaginationBar page={safePage} totalPages={totalPages} total={filteredStudents.length} pageSize={PAGE_SIZE} onPageChange={setPage} />
           </>
         )}
       </section>
@@ -197,17 +185,7 @@ export default function AdminEnrollmentsPage() {
   );
 }
 
-function MiniStat({
-  icon: Icon,
-  label,
-  value,
-  hint,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-  hint: string;
-}) {
+function MiniStat({ icon: Icon, label, value, hint }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; hint: string }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
       <div className="flex items-center justify-between gap-2">
