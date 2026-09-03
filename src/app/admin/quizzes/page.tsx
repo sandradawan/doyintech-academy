@@ -5,6 +5,8 @@ import { getCourse } from "@/lib/courses/catalog";
 import { fetchQuizAttempts, type QuizAttemptRow } from "@/lib/admin-crm";
 import { CERT_PASS_SCORE } from "@/lib/certificates";
 import { PaginationBar, usePagedItems } from "@/components/admin/pagination";
+import { useRealtimeSync } from "@/lib/realtime";
+import { LiveBadge } from "@/components/admin/live-badge";
 
 const PAGE_SIZE = 15;
 
@@ -14,13 +16,30 @@ export default function AdminQuizzesPage() {
   const [q, setQ] = useState("");
   const [resultFilter, setResultFilter] = useState<"all" | "pass" | "fail">("all");
   const [page, setPage] = useState(1);
+  const [live, setLive] = useState(true);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+
+  async function load(silent = false) {
+    if (!silent) setLoading(true);
+    try {
+      setRows(await fetchQuizAttempts(300));
+      setLive(true);
+      setLastSync(new Date());
+    } catch {
+      setRows([]);
+      setLive(false);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    fetchQuizAttempts(300)
-      .then(setRows)
-      .catch(() => setRows([]))
-      .finally(() => setLoading(false));
+    void load();
   }, []);
+
+  useRealtimeSync(["quiz_attempts"], () => {
+    void load(true);
+  });
 
   const passRate =
     rows.length === 0 ? 0 : Math.round((rows.filter((r) => r.passed).length / rows.length) * 100);
@@ -51,9 +70,12 @@ export default function AdminQuizzesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">Quiz attempts</h1>
-        <p className="mt-1 text-sm text-muted">Multi-question assessments (pass mark {CERT_PASS_SCORE}%).</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">Quiz attempts</h1>
+          <p className="mt-1 text-sm text-muted">Multi-question assessments (pass mark {CERT_PASS_SCORE}%).</p>
+        </div>
+        <LiveBadge live={live} lastSync={lastSync} />
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-xl border border-border bg-surface p-4">
