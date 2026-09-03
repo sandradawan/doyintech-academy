@@ -3,6 +3,37 @@
 import type { Course, CourseModule, Lesson } from "@/lib/courses/types";
 import type { Enrollment } from "@/lib/auth";
 
+/** Flatten course lessons in outline order. */
+export function flattenLessons(course: Course): Array<{ moduleIndex: number; lesson: Lesson }> {
+  const out: Array<{ moduleIndex: number; lesson: Lesson }> = [];
+  course.modules.forEach((mod, moduleIndex) => {
+    for (const lesson of mod.lessons) {
+      out.push({ moduleIndex, lesson });
+    }
+  });
+  return out;
+}
+
+/**
+ * Sequential unlock: lesson N opens only after lessons 0..N-1 are complete.
+ * Module 0 lesson 0 is always open once enrolled (or for preview of first lesson).
+ */
+export function isLessonUnlocked(
+  course: Course,
+  enrollment: Enrollment | undefined,
+  lessonId: string,
+): boolean {
+  const flat = flattenLessons(course);
+  const idx = flat.findIndex((x) => x.lesson.id === lessonId);
+  if (idx < 0) return false;
+  if (idx === 0) return true;
+  if (!enrollment) return false;
+  for (let i = 0; i < idx; i++) {
+    if (!enrollment.completedLessons.includes(flat[i].lesson.id)) return false;
+  }
+  return true;
+}
+
 /** Module 0 is always open. Module N opens only after every lesson in modules 0..N-1 is complete. */
 export function isModuleUnlocked(
   course: Course,
@@ -68,16 +99,15 @@ export function getNextIncompleteLesson(
   course: Course,
   enrollment: Enrollment | undefined,
 ): { moduleIndex: number; lesson: Lesson } | null {
+  const flat = flattenLessons(course);
   if (!enrollment) {
-    const first = course.modules[0]?.lessons[0];
-    return first ? { moduleIndex: 0, lesson: first } : null;
+    const first = flat[0];
+    return first ? { moduleIndex: first.moduleIndex, lesson: first.lesson } : null;
   }
-  for (let i = 0; i < course.modules.length; i++) {
-    if (!isModuleUnlocked(course, enrollment, i)) break;
-    for (const lesson of course.modules[i].lessons) {
-      if (!enrollment.completedLessons.includes(lesson.id)) {
-        return { moduleIndex: i, lesson };
-      }
+  for (const item of flat) {
+    if (!isLessonUnlocked(course, enrollment, item.lesson.id)) break;
+    if (!enrollment.completedLessons.includes(item.lesson.id)) {
+      return { moduleIndex: item.moduleIndex, lesson: item.lesson };
     }
   }
   return null;
