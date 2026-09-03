@@ -58,6 +58,19 @@ export type ContentOverrideRow = {
   updatedAt: string;
 };
 
+export type QuizAttemptRow = {
+  id: string;
+  userId: string;
+  courseSlug: string;
+  score: number;
+  passed: boolean;
+  questionCount: number | null;
+  correctCount: number | null;
+  createdAt: string;
+  studentName?: string;
+  studentEmail?: string;
+};
+
 function sb() {
   return createClient() as any;
 }
@@ -327,4 +340,37 @@ export function formatNgn(amountNgn: number) {
     currency: "NGN",
     maximumFractionDigits: 0,
   }).format(amountNgn);
+}
+
+export async function fetchQuizAttempts(limit = 100): Promise<QuizAttemptRow[]> {
+  const supabase = sb();
+  const { data, error } = await supabase
+    .from("quiz_attempts")
+    .select("id, user_id, course_slug, score, passed, question_count, correct_count, created_at")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error || !data) return [];
+  const userIds = [...new Set((data as any[]).map((r) => r.user_id).filter(Boolean))];
+  let profileMap: Record<string, { full_name?: string; email?: string }> = {};
+  if (userIds.length) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", userIds);
+    for (const p of profiles || []) {
+      profileMap[p.id] = p;
+    }
+  }
+  return (data as any[]).map((r) => ({
+    id: r.id,
+    userId: r.user_id,
+    courseSlug: r.course_slug,
+    score: r.score,
+    passed: r.passed,
+    questionCount: r.question_count ?? null,
+    correctCount: r.correct_count ?? null,
+    createdAt: r.created_at,
+    studentName: profileMap[r.user_id]?.full_name || undefined,
+    studentEmail: profileMap[r.user_id]?.email || undefined,
+  }));
 }
