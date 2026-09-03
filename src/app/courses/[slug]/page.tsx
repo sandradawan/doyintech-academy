@@ -34,6 +34,7 @@ import {
   isCourseLessonsComplete,
   isModuleComplete,
   isModuleUnlocked,
+  isLessonUnlocked,
   moduleProgress,
 } from "@/lib/progress";
 import { CERT_PASS_SCORE } from "@/lib/certificates";
@@ -53,36 +54,16 @@ const kindLabel: Record<LessonKind, string> = {
   quiz: "Quiz",
 };
 
+/** DoyinTech playlist + other course trailers */
 const LESSON_VIDEO: Record<string, string> = {
-  "wf-1-1": "UB1O30fX-d8",
-  "wf-3-1": "1Rs2ND1ryYc",
-  "wf-4-1": "0eWRW09YTCA",
+  "wf-1-1": "CTiMiM99wSE",
+  "wf-1-2": "u7QxB-woWX0",
+  "wf-1-3": "uJ7dUicwQOU",
+  "wf-2-1": "Um0cfZB9Lmc",
+  "wf-2-2": "V2YAF2DrFyY",
   "js-1-1": "W6NZfCO5SIk",
   "js-2-1": "W6NZfCO5SIk",
   "js-3-1": "PoRJizdjiFE",
-  "re-1-1": "Tn6-PIqc4UM",
-  "re-3-1": "Tn6-PIqc4UM",
-  "ts-1-1": "30LWjhZzg50",
-  "ts-2-1": "30LWjhZzg50",
-  "be-1-1": "fgTGADljAeg",
-  "be-2-3": "fgTGADljAeg",
-  "git-1-1": "RGOj5yH7evk",
-  "git-2-1": "RGOj5yH7evk",
-  "py-1-1": "rfscVS0vtbw",
-  "py-2-1": "rfscVS0vtbw",
-  "hc-1-1": "1Rs2ND1ryYc",
-  "nx-1-1": "ZVBC_EZvnfI",
-  "nx-2-1": "ZVBC_EZvnfI",
-  "sql-1-1": "HXV3zeQKqGY",
-  "sql-2-1": "HXV3zeQKqGY",
-  "dsa-1-1": "8hly31x25IM",
-  "dsa-2-1": "8hly31x25IM",
-  "cy-1-1": "inWWhr5tnEA",
-  "cy-2-1": "inWWhr5tnEA",
-  "rn-1-1": "0-S5a0eXPoc",
-  "dk-1-1": "3c-iBn73dDE",
-  "ai-1-1": "jHv63Uvk5VA",
-  "ai-2-1": "jHv63Uvk5VA",
 };
 
 export default function CourseDetailPage() {
@@ -156,7 +137,10 @@ export default function CourseDetailPage() {
   const allLessonsDone = isCourseLessonsComplete(course, enrollment);
   const active = flatLessons.find((f) => f.lesson.id === activeLessonId) ?? flatLessons[0];
   const activeUnlocked =
-    !!enrollment && active && isModuleUnlocked(course, enrollment, active.moduleIndex);
+    !!enrollment &&
+    active &&
+    isModuleUnlocked(course, enrollment, active.moduleIndex) &&
+    isLessonUnlocked(course, enrollment, active.lesson.id);
 
   async function handleEnroll() {
     if (!student) {
@@ -232,7 +216,7 @@ export default function CourseDetailPage() {
               {student ? (busy ? "Enrolling…" : "Enroll for free") : "Sign in to enroll"}
             </button>
             <p className="mt-3 text-xs text-muted">
-              After enroll: outline, reading + video side by side, then quiz (≥{CERT_PASS_SCORE}%) for certificate. Download requires payment.
+              Watch each video (≥90%) to unlock the next. Final quiz unlocks after all videos. Certificate ≥{CERT_PASS_SCORE}% + payment to download.
             </p>
             <ul className="mt-4 space-y-2 text-sm text-muted">
               {course.outcomes.map((o) => (
@@ -248,7 +232,7 @@ export default function CourseDetailPage() {
   }
 
   const yt =
-    active && (LESSON_VIDEO[active.lesson.id] || (active.lesson.kind === "video" ? "UB1O30fX-d8" : null));
+    active && (LESSON_VIDEO[active.lesson.id] || (active.lesson.kind === "video" ? LESSON_VIDEO["wf-1-1"] : null));
   const isQuizLesson = active?.lesson.kind === "quiz";
   const done = active ? enrollment.completedLessons.includes(active.lesson.id) : false;
 
@@ -304,7 +288,7 @@ export default function CourseDetailPage() {
                         const Icon = kindIcon[lesson.kind];
                         const isActive = lesson.id === activeLessonId;
                         const isDone = enrollment.completedLessons.includes(lesson.id);
-                        const canOpen = unlocked;
+                        const canOpen = unlocked && isLessonUnlocked(course, enrollment, lesson.id);
                         return (
                           <li key={lesson.id}>
                             <button
@@ -320,8 +304,10 @@ export default function CourseDetailPage() {
                             >
                               {isDone ? (
                                 <Check className="mt-0.5 size-3.5 shrink-0 text-success" />
-                              ) : (
+                              ) : canOpen ? (
                                 <Icon className="mt-0.5 size-3.5 shrink-0" />
+                              ) : (
+                                <Lock className="mt-0.5 size-3.5 shrink-0" />
                               )}
                               <span className="min-w-0 flex-1">
                                 <span className="line-clamp-2 font-medium">{lesson.title}</span>
@@ -384,19 +370,38 @@ export default function CourseDetailPage() {
                           youtubeId={yt}
                           title={active.lesson.title}
                           thumbnailUrl={youtubeThumb(yt)}
+                          courseSlug={slug}
+                          lessonId={active.lesson.id}
+                          onComplete={() => {
+                            if (!enrollment.completedLessons.includes(active.lesson.id)) {
+                              void handleComplete(active.lesson.id);
+                            }
+                          }}
                         />
                       ) : (
                         <div className="flex aspect-video items-center justify-center bg-surface-2 text-sm text-muted">
-                          No video for this lesson — use the reading panel.
+                          No video for this lesson.
                         </div>
                       )}
                     </section>
                     <section className="overflow-hidden rounded-xl border border-border bg-surface">
                       <div className="border-b border-border px-3 py-2 text-xs font-semibold tracking-wide text-muted uppercase">
-                        Reading & practice
+                        Notes
                       </div>
                       <div className="max-h-[28rem] overflow-y-auto p-3 sm:max-h-[32rem]">
-                        <LessonContentPanel lessonId={active.lesson.id} />
+                        <LessonContentPanel
+                          lessonId={active.lesson.id}
+                          courseSlug={slug}
+                          youtubeId={LESSON_VIDEO[active.lesson.id] || null}
+                          onVideoComplete={() => {
+                            if (!enrollment.completedLessons.includes(active.lesson.id)) {
+                              void handleComplete(active.lesson.id);
+                            }
+                          }}
+                        />
+                        <p className="mt-3 text-xs text-subtle">
+                          Watch at least 90% of the video (or to the end) to unlock the next lesson.
+                        </p>
                       </div>
                     </section>
                   </div>
@@ -404,7 +409,7 @@ export default function CourseDetailPage() {
                   <div className="flex flex-wrap items-center gap-3">
                     <button
                       type="button"
-                      disabled={busy || done}
+                      disabled={busy || done || active.lesson.kind === "video"}
                       onClick={() => handleComplete(active.lesson.id)}
                       className={cn(
                         "inline-flex h-11 items-center rounded-md px-4 text-sm font-semibold",
@@ -413,9 +418,15 @@ export default function CourseDetailPage() {
                           : "bg-primary text-primary-fg hover:bg-primary/90",
                       )}
                     >
-                      {done ? "Completed" : "Mark lesson complete"}
+                      {done
+                        ? "Completed"
+                        : active.lesson.kind === "video"
+                          ? "Watch ≥90% to unlock next"
+                          : "Mark lesson complete"}
                     </button>
-                    {nextLesson && nextLesson.lesson.id !== active.lesson.id ? (
+                    {nextLesson &&
+                    nextLesson.lesson.id !== active.lesson.id &&
+                    isLessonUnlocked(course, enrollment, nextLesson.lesson.id) ? (
                       <button
                         type="button"
                         onClick={() => setActiveLessonId(nextLesson.lesson.id)}
@@ -444,10 +455,9 @@ export default function CourseDetailPage() {
             </div>
           ) : null}
 
-          {!allLessonsDone && nextLesson ? (
+          {!allLessonsDone ? (
             <p className="mt-8 text-xs text-subtle">
-              Final quiz unlocks when every lesson is complete. Certificate requires ≥{CERT_PASS_SCORE}%
-              on the text assessment; download requires payment.
+              Videos unlock in order. Final quiz opens after Day 5. Certificate requires ≥{CERT_PASS_SCORE}% and payment to download.
             </p>
           ) : null}
         </main>
