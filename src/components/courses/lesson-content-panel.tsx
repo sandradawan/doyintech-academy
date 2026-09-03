@@ -6,7 +6,17 @@ import { contentPath, lessonBody } from "@/lib/courses/content";
 import { VideoPlayer } from "@/components/media/video-player";
 import { CheckCircle2, Code2, ListChecks } from "lucide-react";
 
-export function LessonContentPanel({ lessonId }: { lessonId: string }) {
+export function LessonContentPanel({
+  lessonId,
+  youtubeId: youtubeOverride,
+  onVideoComplete,
+  courseSlug,
+}: {
+  lessonId: string;
+  youtubeId?: string | null;
+  onVideoComplete?: () => void;
+  courseSlug?: string;
+}) {
   const [data, setData] = useState<LessonContent | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,6 +51,23 @@ export function LessonContentPanel({ lessonId }: { lessonId: string }) {
     return <p className="mt-3 text-xs text-subtle">Loading lesson…</p>;
   }
   if (error === "not_found" || !data) {
+    // Still allow playlist video override when JSON is missing
+    if (youtubeOverride) {
+      return (
+        <div className="mt-3 space-y-4 rounded-lg border border-border bg-bg p-3 sm:p-4">
+          <VideoPlayer
+            videoId={`lesson-${lessonId}`}
+            youtubeId={youtubeOverride}
+            title="Lesson video"
+            className="rounded-lg border border-border"
+            onComplete={onVideoComplete}
+            courseSlug={courseSlug}
+            lessonId={lessonId}
+          />
+          <p className="text-xs text-subtle">Watch ≥90% of the video to unlock the next lesson.</p>
+        </div>
+      );
+    }
     return (
       <p className="mt-3 text-xs text-subtle">
         Full lesson content is being published. Summary above still applies.
@@ -49,7 +76,7 @@ export function LessonContentPanel({ lessonId }: { lessonId: string }) {
   }
 
   const body = lessonBody(data);
-  const youtubeId = data.youtubeId || undefined;
+  const youtubeId = youtubeOverride || data.youtubeId || undefined;
 
   return (
     <div className="mt-3 space-y-4 rounded-lg border border-border bg-bg p-3 sm:p-4">
@@ -60,6 +87,9 @@ export function LessonContentPanel({ lessonId }: { lessonId: string }) {
           title={data.title}
           thumbnailUrl={data.thumbnail}
           className="rounded-lg border border-border"
+          onComplete={onVideoComplete}
+          courseSlug={courseSlug}
+          lessonId={lessonId}
         />
       ) : null}
 
