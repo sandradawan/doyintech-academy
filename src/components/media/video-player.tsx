@@ -70,12 +70,18 @@ export function VideoPlayer({
   title,
   className,
   thumbnailUrl,
+  onComplete,
+  courseSlug,
+  lessonId,
 }: {
   videoId: string;
   youtubeId: string;
   title: string;
   className?: string;
   thumbnailUrl?: string;
+  onComplete?: () => void;
+  courseSlug?: string;
+  lessonId?: string;
 }) {
   const reactId = useId().replace(/:/g, "");
   const containerId = `yt-${reactId}`;
@@ -83,24 +89,34 @@ export function VideoPlayer({
   const pollRef = useRef<number | null>(null);
   const [active, setActive] = useState(false);
   const [progress, setProgress] = useState<VideoProgressRecord | null>(null);
+  const completedRef = useRef(false);
 
   useEffect(() => {
     setProgress(getVideoProgress(videoId));
+    completedRef.current = Boolean(getVideoProgress(videoId)?.completed);
   }, [videoId]);
 
   const persist = useCallback(
     (position: number, duration: number, forceComplete = false) => {
       if (!duration || duration <= 0) return;
       const percent = Math.round((position / duration) * 100);
-      const rec = saveVideoProgress(videoId, {
-        percent,
-        position,
-        duration,
-        completed: forceComplete || percent >= 90,
-      });
+      const rec = saveVideoProgress(
+        videoId,
+        {
+          percent,
+          position,
+          duration,
+          completed: forceComplete || percent >= 90,
+        },
+        courseSlug || lessonId ? { courseSlug, lessonId } : undefined,
+      );
       setProgress(rec);
+      if (rec.completed && !completedRef.current) {
+        completedRef.current = true;
+        onComplete?.();
+      }
     },
-    [videoId],
+    [videoId, onComplete, courseSlug, lessonId],
   );
 
   useEffect(() => {
