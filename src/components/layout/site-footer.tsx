@@ -124,6 +124,11 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link href="/certificates/verify" className="text-muted transition-colors hover:text-fg">
+                Verify certificate
+              </Link>
+            </li>
+            <li>
               <Link href="/about" className="text-muted transition-colors hover:text-fg">
                 About the academy
               </Link>
