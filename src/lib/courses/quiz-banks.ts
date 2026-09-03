@@ -1,6 +1,6 @@
 import type { QuizQuestion } from "@/components/courses/quiz-panel";
 
-/** Course-specific assessment banks. */
+/** Course-specific assessment banks (8–10 questions each). */
 export const COURSE_QUIZ_BANKS: Record<string, QuizQuestion[]> = {
   "web-foundations": [
     { id: "wf-q1", prompt: "Which language describes the structure and meaning of a web page?", choices: ["CSS", "HTML", "JavaScript", "SQL"], correctIndex: 1 },
@@ -97,6 +97,66 @@ export const COURSE_QUIZ_BANKS: Record<string, QuizQuestion[]> = {
     { id: "be-q6", prompt: "Pagination helps by…", choices: ["Loading the entire table always", "Returning limited pages of results", "Deleting indexes", "Disabling caches"], correctIndex: 1 },
     { id: "be-q7", prompt: "Sessions/cookies on the server help…", choices: ["Style pages", "Remember who the user is across requests", "Generate CSS", "Replace HTTPS"], correctIndex: 1 },
     { id: "be-q8", prompt: "Status 403 means…", choices: ["Success", "Forbidden (authenticated but not allowed)", "Found", "No content only"], correctIndex: 1 },
+  ],
+  "html-css-advanced": [
+    { id: "hc-q1", prompt: "CSS Grid is best for…", choices: ["One-dimensional rows only", "Two-dimensional page layouts", "Database joins", "Git branching"], correctIndex: 1 },
+    { id: "hc-q2", prompt: "clamp() is useful for…", choices: ["SQL limits", "Fluid typography and spacing between min and max", "Deleting CSS", "Only animations"], correctIndex: 1 },
+    { id: "hc-q3", prompt: "Custom properties (CSS variables) start with…", choices: ["$", "--", "var.", "@"], correctIndex: 1 },
+    { id: "hc-q4", prompt: "prefers-reduced-motion helps…", choices: ["Faster SQL", "Accessibility by reducing animation", "SEO only", "Paystack"], correctIndex: 1 },
+    { id: "hc-q5", prompt: "A good class naming approach is…", choices: ["Random strings", "Consistent, readable patterns", "Only inline styles forever", "IDs for everything"], correctIndex: 1 },
+    { id: "hc-q6", prompt: "Container queries let styles react to…", choices: ["Only the viewport", "The size of a parent container", "Git status", "DNS"], correctIndex: 1 },
+    { id: "hc-q7", prompt: "aspect-ratio is used to…", choices: ["Encrypt video", "Maintain width/height proportions", "Sort tables", "Hash passwords"], correctIndex: 1 },
+    { id: "hc-q8", prompt: "Logical properties like margin-inline help with…", choices: ["Only print CSS", "Writing-direction aware spacing", "SQL indexes", "Node versions"], correctIndex: 1 },
+  ],
+  "data-structures-algorithms": [
+    { id: "dsa-q1", prompt: "Big-O describes…", choices: ["Exact runtime in ms always", "How runtime/space grow as input grows", "Only memory brand", "CSS specificity"], correctIndex: 1 },
+    { id: "dsa-q2", prompt: "An array gives O(1) access by…", choices: ["Value search always", "Index", "Hash only", "Sorting first"], correctIndex: 1 },
+    { id: "dsa-q3", prompt: "A stack is…", choices: ["FIFO", "LIFO", "Random access tree", "SQL view"], correctIndex: 1 },
+    { id: "dsa-q4", prompt: "A queue is…", choices: ["LIFO", "FIFO", "A hash map", "A CSS grid"], correctIndex: 1 },
+    { id: "dsa-q5", prompt: "Hash maps average O(1) for…", choices: ["Sorting only", "Key lookup/insert", "Rendering DOM", "Git merge"], correctIndex: 1 },
+    { id: "dsa-q6", prompt: "Binary search requires…", choices: ["Unsorted data", "Sorted data", "A GPU", "CSS flex"], correctIndex: 1 },
+    { id: "dsa-q7", prompt: "Recursion must eventually…", choices: ["Grow stack forever", "Hit a base case", "Call SQL", "Disable types"], correctIndex: 1 },
+    { id: "dsa-q8", prompt: "A graph is made of…", choices: ["Only arrays", "Nodes and edges", "Only CSS", "Certificates"], correctIndex: 1 },
+  ],
+  "cybersecurity-basics": [
+    { id: "cy-q1", prompt: "Phishing aims to…", choices: ["Speed up CSS", "Trick users into revealing secrets", "Compile TypeScript", "Sort arrays"], correctIndex: 1 },
+    { id: "cy-q2", prompt: "HTTPS primarily provides…", choices: ["Faster images only", "Encrypted transport and server authenticity", "Free hosting", "Git history"], correctIndex: 1 },
+    { id: "cy-q3", prompt: "Least privilege means…", choices: ["Everyone is admin", "Grant only the access needed", "Disable passwords", "Share one account"], correctIndex: 1 },
+    { id: "cy-q4", prompt: "A strong password should be…", choices: ["Your name + 123", "Long, unique, and hard to guess", "Written in HTML comments", "The same everywhere"], correctIndex: 1 },
+    { id: "cy-q5", prompt: "MFA adds…", choices: ["Another CSS file", "A second factor beyond password", "SQL triggers only", "Dark mode"], correctIndex: 1 },
+    { id: "cy-q6", prompt: "SQL injection is mitigated by…", choices: ["String concat of all input", "Parameterized queries / validation", "Disabling HTTPS", "Using only GET"], correctIndex: 1 },
+    { id: "cy-q7", prompt: "XSS is about…", choices: ["Git branches", "Injecting scripts into pages viewed by others", "Faster React", "Docker only"], correctIndex: 1 },
+    { id: "cy-q8", prompt: "Keeping software updated helps…", choices: ["Only UI polish", "Close known security holes", "Replace backups", "Avoid types"], correctIndex: 1 },
+  ],
+  "mobile-react-native": [
+    { id: "rn-q1", prompt: "React Native builds…", choices: ["Only websites", "Native mobile apps using React", "SQL databases", "CSS-only themes"], correctIndex: 1 },
+    { id: "rn-q2", prompt: "Core components include…", choices: ["div and span only", "View, Text, Image", "SELECT and JOIN", "iframe only"], correctIndex: 1 },
+    { id: "rn-q3", prompt: "StyleSheet.create is used to…", choices: ["Query Postgres", "Define reusable styles", "Commit Git", "Run Paystack"], correctIndex: 1 },
+    { id: "rn-q4", prompt: "Flexbox in RN defaults to…", choices: ["row", "column", "grid", "absolute only"], correctIndex: 1 },
+    { id: "rn-q5", prompt: "Navigation libraries help you…", choices: ["Style CSS only", "Move between screens", "Encrypt disks", "Write SQL"], correctIndex: 1 },
+    { id: "rn-q6", prompt: "Platform-specific code can use…", choices: ["Only HTML comments", "Platform.OS or .ios.js / .android.js files", "Git ignore only", "DNS"], correctIndex: 1 },
+    { id: "rn-q7", prompt: "AsyncStorage is for…", choices: ["Server SQL", "Simple local key-value persistence", "CDN caching only", "Certificates"], correctIndex: 1 },
+    { id: "rn-q8", prompt: "Testing on real devices matters because…", choices: ["Emulators are always identical", "Performance and sensors differ from desktop", "RN only runs on servers", "Git requires it"], correctIndex: 1 },
+  ],
+  "devops-docker": [
+    { id: "dk-q1", prompt: "A container packages…", choices: ["Only CSS", "App code with its runtime dependencies", "A physical server", "Git history only"], correctIndex: 1 },
+    { id: "dk-q2", prompt: "A Dockerfile defines…", choices: ["SQL schema only", "How to build an image", "Paystack keys", "React props"], correctIndex: 1 },
+    { id: "dk-q3", prompt: "docker compose is useful for…", choices: ["Single file CSS", "Multi-service local stacks", "Replacing Git", "Only mobile apps"], correctIndex: 1 },
+    { id: "dk-q4", prompt: "An image is…", choices: ["A running process", "An immutable template for containers", "A database row", "A certificate"], correctIndex: 1 },
+    { id: "dk-q5", prompt: "Volumes help with…", choices: ["Deleting code", "Persisting data outside the container filesystem", "Styling UI", "DNS"], correctIndex: 1 },
+    { id: "dk-q6", prompt: "CI typically means…", choices: ["Creative Illustrator", "Continuous Integration of changes with automated checks", "Certificate Issue only", "CSS Inline"], correctIndex: 1 },
+    { id: "dk-q7", prompt: "Pinning base image versions helps…", choices: ["Random builds", "Reproducible builds", "Faster CSS", "Skip tests always"], correctIndex: 1 },
+    { id: "dk-q8", prompt: "Healthchecks tell orchestrators…", choices: ["Font size", "Whether a container is ready/alive", "Git branch name", "Quiz scores"], correctIndex: 1 },
+  ],
+  "ai-prompt-engineering": [
+    { id: "ai-q1", prompt: "A good prompt is usually…", choices: ["Vague one word", "Specific about goal, format, and constraints", "Only emojis", "SQL only"], correctIndex: 1 },
+    { id: "ai-q2", prompt: "Few-shot prompting means…", choices: ["No examples", "Providing a few input/output examples", "Training a new model from scratch always", "Deleting context"], correctIndex: 1 },
+    { id: "ai-q3", prompt: "System / role instructions help…", choices: ["Style CSS", "Set behavior and boundaries for the model", "Compile TypeScript", "Host Docker"], correctIndex: 1 },
+    { id: "ai-q4", prompt: "Hallucinations are…", choices: ["Perfect facts always", "Plausible but incorrect model outputs", "Git merge conflicts", "CSS bugs only"], correctIndex: 1 },
+    { id: "ai-q5", prompt: "You should verify AI code by…", choices: ["Shipping blindly", "Running tests and reading critical paths", "Deleting reviews", "Only checking fonts"], correctIndex: 1 },
+    { id: "ai-q6", prompt: "Context windows limit…", choices: ["Disk size only", "How much text the model can consider at once", "Number of CSS files", "Paystack amount"], correctIndex: 1 },
+    { id: "ai-q7", prompt: "Chain-of-thought style prompts ask the model to…", choices: ["Skip reasoning", "Show intermediate reasoning steps when helpful", "Only output binary", "Ignore format"], correctIndex: 1 },
+    { id: "ai-q8", prompt: "Sensitive data in prompts should be…", choices: ["Pasted freely always", "Avoided or redacted", "Committed to Git", "Emailed publicly"], correctIndex: 1 },
   ],
 };
 
