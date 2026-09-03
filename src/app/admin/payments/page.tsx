@@ -10,6 +10,8 @@ import {
   type CrmPayment,
 } from "@/lib/admin-crm";
 import { PaginationBar, usePagedItems } from "@/components/admin/pagination";
+import { useRealtimeSync } from "@/lib/realtime";
+import { LiveBadge } from "@/components/admin/live-badge";
 
 const PAGE_SIZE = 15;
 
@@ -20,22 +22,31 @@ export default function AdminPaymentsPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | "success" | "failed" | "pending">("all");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
+  const [live, setLive] = useState(true);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
 
-  async function refresh() {
-    setLoading(true);
+  async function refresh(silent = false) {
+    if (!silent) setLoading(true);
     try {
       setRows(await fetchCrmPayments());
       setError("");
+      setLive(true);
+      setLastSync(new Date());
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load payments");
+      setLive(false);
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, []);
+
+  useRealtimeSync(["payments"], () => {
+    void refresh(true);
+  });
 
   const stats = useMemo(() => paymentStatsFrom(rows), [rows]);
   const totalFmt = useMemo(() => formatNgn(stats.revenueNgn), [stats.revenueNgn]);
@@ -77,7 +88,7 @@ export default function AdminPaymentsPage() {
         status: "success",
         provider: "manual",
       });
-      await refresh();
+      await refresh(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not record payment");
     }
@@ -90,10 +101,13 @@ export default function AdminPaymentsPage() {
           <h1 className="font-display text-2xl font-semibold tracking-tight">Payments</h1>
           <p className="mt-1 text-sm text-muted">Supabase payments · certificate fee {CERT_FEE_LABEL}</p>
         </div>
-        <button type="button" onClick={addManual}
-          className="h-10 rounded-md border border-border px-3 text-sm font-semibold hover:bg-surface-2">
-          Record manual payment
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <LiveBadge live={live && !error} lastSync={lastSync} />
+          <button type="button" onClick={addManual}
+            className="h-10 rounded-md border border-border px-3 text-sm font-semibold hover:bg-surface-2">
+            Record manual payment
+          </button>
+        </div>
       </div>
       {error ? (
         <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-500">{error}</p>
