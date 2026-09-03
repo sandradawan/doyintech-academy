@@ -9,11 +9,17 @@ import {
   recordCrmPaymentDb,
   type CrmPayment,
 } from "@/lib/admin-crm";
+import { PaginationBar, usePagedItems } from "@/components/admin/pagination";
+
+const PAGE_SIZE = 15;
 
 export default function AdminPaymentsPage() {
   const [rows, setRows] = useState<CrmPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "success" | "failed" | "pending">("all");
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
 
   async function refresh() {
     setLoading(true);
@@ -33,6 +39,26 @@ export default function AdminPaymentsPage() {
 
   const stats = useMemo(() => paymentStatsFrom(rows), [rows]);
   const totalFmt = useMemo(() => formatNgn(stats.revenueNgn), [stats.revenueNgn]);
+
+  const filtered = useMemo(() => {
+    const query = q.trim().toLowerCase();
+    return rows.filter((p) => {
+      if (statusFilter !== "all" && p.status !== statusFilter) return false;
+      if (!query) return true;
+      return (
+        p.email.toLowerCase().includes(query) ||
+        p.certificateId.toLowerCase().includes(query) ||
+        p.reference.toLowerCase().includes(query) ||
+        p.courseSlug.toLowerCase().includes(query)
+      );
+    });
+  }, [rows, statusFilter, q]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter, q]);
+
+  const { slice, totalPages, safePage } = usePagedItems(filtered, PAGE_SIZE, page);
 
   async function addManual() {
     const email = window.prompt("Student email?");
@@ -62,63 +88,83 @@ export default function AdminPaymentsPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-semibold tracking-tight">Payments</h1>
-          <p className="mt-1 text-sm text-muted">Supabase payments · {CERT_FEE_LABEL}</p>
+          <p className="mt-1 text-sm text-muted">Supabase payments · certificate fee {CERT_FEE_LABEL}</p>
         </div>
         <button type="button" onClick={addManual}
           className="h-10 rounded-md border border-border px-3 text-sm font-semibold hover:bg-surface-2">
           Record manual payment
         </button>
       </div>
-      {error ? <p className="text-sm text-red-500">{error}</p> : null}
-      {loading ? <p className="text-sm text-muted">Loading…</p> : null}
-      <div className="grid gap-4 sm:grid-cols-3">
+      {error ? (
+        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-500">{error}</p>
+      ) : null}
+      <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-xl border border-border bg-surface p-4">
-          <p className="text-xs font-semibold tracking-wide text-muted uppercase">Revenue</p>
+          <p className="text-[11px] font-semibold tracking-wide text-muted uppercase">Revenue</p>
           <p className="mt-2 font-display text-2xl font-semibold tabular-nums">{totalFmt}</p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-4">
-          <p className="text-xs font-semibold tracking-wide text-muted uppercase">Successful</p>
+          <p className="text-[11px] font-semibold tracking-wide text-muted uppercase">Successful</p>
           <p className="mt-2 font-display text-2xl font-semibold tabular-nums">{stats.success}</p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-4">
-          <p className="text-xs font-semibold tracking-wide text-muted uppercase">Failed / total</p>
+          <p className="text-[11px] font-semibold tracking-wide text-muted uppercase">Failed / total</p>
           <p className="mt-2 font-display text-2xl font-semibold tabular-nums">{stats.failed} / {stats.total}</p>
         </div>
       </div>
-      <div className="overflow-x-auto rounded-xl border border-border bg-surface">
-        <table className="w-full min-w-[800px] text-left text-sm">
-          <thead className="border-b border-border bg-surface-2/50 text-xs tracking-wide text-muted uppercase">
-            <tr>
-              <th className="px-4 py-3 font-semibold">Date</th>
-              <th className="px-4 py-3 font-semibold">Customer</th>
-              <th className="px-4 py-3 font-semibold">Certificate</th>
-              <th className="px-4 py-3 font-semibold">Amount</th>
-              <th className="px-4 py-3 font-semibold">Status</th>
-              <th className="px-4 py-3 font-semibold">Reference</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {rows.map((p) => (
-              <tr key={p.id} className="hover:bg-surface-2/40">
-                <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">{new Date(p.paidAt).toLocaleString()}</td>
-                <td className="px-4 py-3">
-                  <p className="font-medium">{p.email}</p>
-                  <p className="text-xs text-muted">{p.courseSlug}</p>
-                </td>
-                <td className="px-4 py-3 font-mono text-xs">{p.certificateId}</td>
-                <td className="px-4 py-3 tabular-nums font-semibold">{formatNgn(p.amountKobo / 100)}</td>
-                <td className="px-4 py-3 capitalize">
-                  <span className={p.status === "success" ? "text-success" : p.status === "failed" ? "text-orange" : "text-muted"}>{p.status}</span>
-                  <span className="ml-1 text-[10px] text-subtle">· {p.provider}</span>
-                </td>
-                <td className="px-4 py-3 max-w-[10rem] truncate font-mono text-[11px] text-subtle">{p.reference}</td>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search email, certificate, reference…"
+          className="h-10 flex-1 rounded-md border border-border bg-surface px-3 text-sm outline-none focus:border-primary" />
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+          className="h-10 rounded-md border border-border bg-surface px-3 text-sm">
+          <option value="all">All statuses</option>
+          <option value="success">Success</option>
+          <option value="failed">Failed</option>
+          <option value="pending">Pending</option>
+        </select>
+      </div>
+      <div className="overflow-hidden rounded-xl border border-border bg-surface">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[800px] text-left text-sm">
+            <thead className="border-b border-border bg-surface-2/50 text-xs tracking-wide text-muted uppercase">
+              <tr>
+                <th className="px-4 py-3 font-semibold">Date</th>
+                <th className="px-4 py-3 font-semibold">Customer</th>
+                <th className="px-4 py-3 font-semibold">Certificate</th>
+                <th className="px-4 py-3 font-semibold">Amount</th>
+                <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold">Reference</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {!loading && rows.length === 0 ? (
-          <p className="p-8 text-center text-sm text-muted">No payments in the database yet.</p>
-        ) : null}
+            </thead>
+            <tbody className="divide-y divide-border">
+              {loading ? (
+                <tr><td colSpan={6} className="px-4 py-8 text-center text-muted">Loading…</td></tr>
+              ) : (
+                slice.map((p) => (
+                  <tr key={p.id} className="hover:bg-surface-2/40">
+                    <td className="px-4 py-3 text-xs whitespace-nowrap text-muted">{new Date(p.paidAt).toLocaleString()}</td>
+                    <td className="px-4 py-3">
+                      <p className="font-medium">{p.email}</p>
+                      <p className="text-xs text-muted">{p.courseSlug}</p>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs">{p.certificateId}</td>
+                    <td className="px-4 py-3 font-semibold tabular-nums">{formatNgn(p.amountKobo / 100)}</td>
+                    <td className="px-4 py-3 capitalize">
+                      <span className={p.status === "success" ? "text-success" : p.status === "failed" ? "text-orange" : "text-muted"}>{p.status}</span>
+                      <span className="ml-1 text-[10px] text-subtle">· {p.provider}</span>
+                    </td>
+                    <td className="max-w-[10rem] truncate px-4 py-3 font-mono text-[11px] text-subtle">{p.reference}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        {!loading && filtered.length === 0 ? (
+          <p className="p-8 text-center text-sm text-muted">No payments match this filter.</p>
+        ) : (
+          <PaginationBar page={safePage} totalPages={totalPages} total={filtered.length} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        )}
       </div>
     </div>
   );
