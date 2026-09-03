@@ -15,7 +15,7 @@ export function LessonContentPanel({ lessonId }: { lessonId: string }) {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetch(contentPath(lessonId))
+    fetch(`/api/lessons/${encodeURIComponent(lessonId)}`)
       .then(async (res) => {
         if (!res.ok) throw new Error(res.status === 404 ? "not_found" : "load_failed");
         return res.json() as Promise<LessonContent>;
@@ -99,38 +99,24 @@ export function LessonContentPanel({ lessonId }: { lessonId: string }) {
           <p className="text-xs font-semibold text-primary">Practice</p>
           <p className="mt-1 text-sm text-muted">{data.practice.prompt}</p>
           {data.practice.starter ? (
-            <pre className="mt-2 overflow-x-auto rounded bg-surface-2 p-2 text-xs text-fg">
+            <pre className="mt-2 overflow-x-auto rounded bg-surface p-2 text-xs">
               <code>{data.practice.starter}</code>
             </pre>
           ) : null}
         </div>
       ) : null}
 
-      {data.quiz?.length ? (
+      {data.quiz && data.quiz.length > 0 ? (
         <div>
-          <p className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-orange uppercase">
+          <p className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-primary uppercase">
             <ListChecks className="size-3.5" aria-hidden /> Check yourself
           </p>
-          <ul className="mt-2 space-y-3">
-            {data.quiz.map((item, qi) => {
-              const question = item.question || item.q || "";
-              const answerIdx = item.answerIndex ?? item.answer ?? -1;
-              return (
-                <li key={qi} className="text-sm text-muted">
-                  <p className="font-medium text-fg">
-                    {qi + 1}. {question}
-                  </p>
-                  <ol className="mt-1 list-inside list-decimal space-y-0.5 text-xs">
-                    {item.choices.map((c, ci) => (
-                      <li key={ci} className={ci === answerIdx ? "text-primary" : undefined}>
-                        {c}
-                        {ci === answerIdx ? " ✓" : ""}
-                      </li>
-                    ))}
-                  </ol>
-                </li>
-              );
-            })}
+          <ul className="mt-2 space-y-2 text-sm text-muted">
+            {data.quiz.map((q, i) => (
+              <li key={i} className="rounded-md border border-border px-3 py-2">
+                {q.question || q.q}
+              </li>
+            ))}
           </ul>
         </div>
       ) : null}
