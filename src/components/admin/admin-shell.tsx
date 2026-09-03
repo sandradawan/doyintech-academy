@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import {
   BookOpen,
+  ClipboardList,
   CreditCard,
   GraduationCap,
   LayoutDashboard,
@@ -27,6 +28,7 @@ const nav = [
   { href: adminHref("/enrollments"), label: "Enrollments", icon: GraduationCap },
   { href: adminHref("/payments"), label: "Payments", icon: CreditCard },
   { href: adminHref("/content"), label: "Content", icon: BookOpen },
+  { href: adminHref("/quizzes"), label: "Quizzes", icon: ClipboardList },
   { href: adminHref("/waitlist"), label: "Waitlist", icon: ListOrdered },
   { href: adminHref("/settings"), label: "Settings", icon: Settings },
 ] as const;
@@ -79,107 +81,133 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       return;
     }
     setAuthed(true);
-    setAdminName(student.name);
+    setAdminName(student.name || student.email || "Admin");
+    router.refresh();
   }
 
-  async function logout() {
+  async function onLogout() {
     await signOut();
     setAuthed(false);
-    router.push(ADMIN_PUBLIC_BASE);
+    router.push(ADMIN_PUBLIC_BASE || "/admin");
+    router.refresh();
   }
 
   if (!ready) {
     return (
-      <div className="flex min-h-dvh items-center justify-center text-sm text-muted">Loading admin…</div>
+      <div className="flex min-h-dvh items-center justify-center text-sm text-muted">Loading…</div>
     );
   }
 
   if (!authed) {
     return (
-      <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4 py-16">
-        <p className="text-xs font-semibold tracking-widest text-orange uppercase">Admin CRM</p>
-        <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight">Sign in with admin account</h1>
-        <p className="mt-2 text-sm text-muted">
-          Uses Supabase Auth. Your profiles.role must be <code className="text-fg">admin</code>.
-        </p>
-        <form onSubmit={onLogin} className="mt-8 space-y-4 rounded-xl border border-border bg-surface p-6">
-          <label className="block text-sm font-medium">
+      <div className="flex min-h-dvh items-center justify-center px-4">
+        <form onSubmit={onLogin} className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-surface p-6">
+          <div className="flex justify-center">
+            <Logo />
+          </div>
+          <h1 className="text-center font-display text-xl font-semibold">Admin sign in</h1>
+          <p className="text-center text-xs text-muted">CRM for students, payments, and content</p>
+          {error ? (
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-500">{error}</p>
+          ) : null}
+          <label className="block text-sm">
             Email
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-              className="mt-1.5 w-full rounded-md border border-border bg-bg px-3 py-2.5 text-sm" />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="mt-1 w-full rounded-md border border-border bg-bg px-3 py-2 text-sm"
+            />
           </label>
-          <label className="block text-sm font-medium">
+          <label className="block text-sm">
             Password
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-              className="mt-1.5 w-full rounded-md border border-border bg-bg px-3 py-2.5 text-sm" />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="mt-1 w-full rounded-md border border-border bg-bg px-3 py-2 text-sm"
+            />
           </label>
-          {error ? <p className="text-sm text-red-500">{error}</p> : null}
-          <button type="submit" className="flex h-11 w-full items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-fg">
-            Sign in to CRM
+          <button type="submit" className="h-10 w-full rounded-md bg-primary text-sm font-semibold text-primary-fg">
+            Sign in
           </button>
         </form>
-        <Link href="/" className="mt-6 text-center text-sm text-primary hover:underline">← Back to site</Link>
-      </main>
+      </div>
     );
   }
 
-  const sidebar = (
-    <div className="flex h-full w-full flex-col bg-[#0B0E14] text-white">
-      <div className="flex h-14 shrink-0 items-center border-b border-white/10 px-4">
-        <Logo invert />
-        <span className="ml-2 rounded bg-orange/20 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-orange uppercase">CRM</span>
-      </div>
-      <nav className="flex-1 space-y-0.5 overflow-y-auto p-3" aria-label="Admin">
-        {nav.map((item) => {
-          const active = item.exact
-            ? pathname === item.href
-            : pathname === item.href || pathname.startsWith(`${item.href}/`);
-          return (
-            <Link key={item.href} href={item.href} onClick={() => setMobile(false)}
-              className={cn(
-                "flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
-                active ? "bg-white/10 text-white" : "text-white/65 hover:bg-white/5 hover:text-white",
-              )}>
-              <item.icon className="size-4 shrink-0" aria-hidden />
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-      <div className="shrink-0 border-t border-white/10 p-3">
-        <p className="mb-2 truncate px-3 text-xs text-white/50">{adminName}</p>
-        <Link href="/" className="mb-1 flex items-center gap-2 rounded-md px-3 py-2 text-sm text-white/65 hover:bg-white/5 hover:text-white">View site</Link>
-        <button type="button" onClick={logout} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-white/65 hover:bg-white/5 hover:text-white">
+  return (
+    <div className="flex min-h-dvh bg-bg">
+      <aside className="hidden w-60 shrink-0 border-r border-border bg-surface md:flex md:flex-col">
+        <div className="border-b border-border px-4 py-4">
+          <Logo />
+          <p className="mt-1 truncate text-xs text-muted">{adminName}</p>
+        </div>
+        <nav className="flex-1 space-y-0.5 p-2">
+          {nav.map((item) => {
+            const active = item.exact
+              ? pathname === item.href || pathname === `${item.href}/`
+              : pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm",
+                  active ? "bg-primary/10 font-semibold text-primary" : "text-muted hover:bg-surface-2 hover:text-fg",
+                )}
+              >
+                <item.icon className="size-4 shrink-0" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+        <button
+          type="button"
+          onClick={() => void onLogout()}
+          className="m-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted hover:bg-surface-2"
+        >
           <LogOut className="size-4" /> Sign out
         </button>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="flex min-h-dvh w-full bg-bg">
-      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 overflow-hidden border-r border-border md:block">
-        {sidebar}
       </aside>
-      {mobile ? (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <button type="button" className="absolute inset-0 bg-black/50" aria-label="Close menu" onClick={() => setMobile(false)} />
-          <div className="absolute inset-y-0 left-0 w-60 max-w-[85vw] shadow-xl">{sidebar}</div>
-        </div>
-      ) : null}
+
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface/95 px-4 backdrop-blur">
-          <button type="button" className="inline-flex size-10 items-center justify-center rounded-md border border-border md:hidden" onClick={() => setMobile(true)} aria-label="Open menu">
-            {mobile ? <X className="size-5" /> : <Menu className="size-5" />}
+        <header className="flex h-14 items-center gap-3 border-b border-border px-4 md:hidden">
+          <button type="button" onClick={() => setMobile(true)} className="rounded-md p-2 hover:bg-surface-2">
+            <Menu className="size-5" />
           </button>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold">Admin CRM</p>
-            <p className="truncate text-xs text-muted">Live Supabase data</p>
-          </div>
+          <span className="font-display text-sm font-semibold">Admin</span>
         </header>
-        <div className="min-w-0 flex-1 overflow-x-auto">
-          <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">{children}</div>
-        </div>
+        {mobile ? (
+          <div className="fixed inset-0 z-50 md:hidden">
+            <button type="button" className="absolute inset-0 bg-black/50" onClick={() => setMobile(false)} />
+            <div className="absolute inset-y-0 left-0 flex w-64 flex-col bg-surface shadow-xl">
+              <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                <Logo />
+                <button type="button" onClick={() => setMobile(false)}>
+                  <X className="size-5" />
+                </button>
+              </div>
+              <nav className="flex-1 space-y-0.5 p-2">
+                {nav.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobile(false)}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted hover:bg-surface-2"
+                  >
+                    <item.icon className="size-4" />
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </div>
+        ) : null}
+        <main className="flex-1 overflow-x-auto p-4 sm:p-6">{children}</main>
       </div>
     </div>
   );
