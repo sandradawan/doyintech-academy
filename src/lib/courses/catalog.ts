@@ -12,58 +12,50 @@ function L(
   return { id, title, durationMin, kind, summary };
 }
 
+/** DoyinTech playlist https://www.youtube.com/playlist?list=PLb1kWUJelqlw */
+export const WEB_DEV_PLAYLIST_IDS = [
+  "CTiMiM99wSE", // Day 1 — HTML Basics
+  "u7QxB-woWX0", // Day 2 — Page Structure
+  "uJ7dUicwQOU", // Day 3 — Headings & Paragraphs
+  "Um0cfZB9Lmc", // Day 4 — Links & Images
+  "V2YAF2DrFyY", // Day 5 — Lists
+] as const;
+
 export const courses: Course[] = [
   {
     slug: "web-foundations",
-    thumbnail: youtubeThumb("UB1O30fX-d8", "hq"),
+    thumbnail: youtubeThumb(WEB_DEV_PLAYLIST_IDS[0], "hq"),
     title: "Introduction to Web Development",
-    tagline: "Learn HTML, CSS, and how the web works — watch each video to unlock the next.",
+    tagline: "DoyinTech playlist — watch each video fully to unlock the next.",
     description:
-      "A sequential video path into web development. Finish each video (watch ≥90%) to unlock the next lesson.",
+      "Learn HTML step by step with DoyinTech: HTML basics, page structure, headings, links, images, and lists. Watch each video (≥90%) to unlock the next lesson.",
     level: "Beginner",
     accent: "from-sky-600 to-cyan-400",
-    hours: 8,
+    hours: 1,
     featured: true,
     outcomes: [
-      "Structure pages with semantic HTML",
-      "Style layouts with modern CSS",
-      "Use DevTools to debug the DOM",
-      "Ship a responsive landing page",
+      "Write a valid HTML document",
+      "Structure pages with headings and paragraphs",
+      "Add links, images, and lists",
+      "Build a foundation for CSS and JavaScript",
     ],
     modules: [
       {
         id: "wf-1",
-        title: "How the web works",
+        title: "HTML foundations",
         lessons: [
-          L("wf-1-1", "How the web works", 12, "video", "Watch fully to unlock the next video."),
-          L("wf-1-2", "Your first HTML page", 18, "video", "Watch fully to unlock the next video."),
-          L("wf-1-3", "Inspect and understand", 10, "video", "Watch fully to unlock the next video."),
+          L("wf-1-1", "Day 1 — HTML Basics", 3, "video", "Watch fully to unlock Day 2."),
+          L("wf-1-2", "Day 2 — Page Structure", 2, "video", "Watch fully to unlock Day 3."),
+          L("wf-1-3", "Day 3 — Headings & Paragraphs", 2, "video", "Watch fully to unlock Day 4."),
         ],
       },
       {
         id: "wf-2",
-        title: "Structure and meaning",
+        title: "Links, media & lists",
         lessons: [
-          L("wf-2-1", "Semantic HTML", 14, "video", "Watch fully to unlock the next video."),
-          L("wf-2-2", "Forms that collect data", 16, "video", "Watch fully to unlock the next video."),
-        ],
-      },
-      {
-        id: "wf-3",
-        title: "CSS foundations",
-        lessons: [
-          L("wf-3-1", "CSS cascade and selectors", 14, "video", "Watch fully to unlock the next video."),
-          L("wf-3-2", "Box model and spacing", 12, "video", "Watch fully to unlock the next video."),
-          L("wf-3-3", "Flexbox layout lab", 20, "video", "Watch fully to unlock the next video."),
-        ],
-      },
-      {
-        id: "wf-4",
-        title: "Responsive pages",
-        lessons: [
-          L("wf-4-1", "Responsive design", 14, "video", "Watch fully to unlock the next video."),
-          L("wf-4-2", "Ship a landing page", 22, "video", "Watch fully to unlock the next video."),
-          L("wf-4-3", "Introduction to Web Development quiz", 12, "quiz", "Pass at 60% toward your certificate."),
+          L("wf-2-1", "Day 4 — Links & Images", 2, "video", "Watch fully to unlock Day 5."),
+          L("wf-2-2", "Day 5 — Lists", 2, "video", "Watch fully to unlock the quiz."),
+          L("wf-2-3", "Introduction to Web Development quiz", 10, "quiz", "Pass at 60% toward your certificate."),
         ],
       },
     ],
@@ -73,12 +65,18 @@ export const courses: Course[] = [
     thumbnail: youtubeThumb("W6NZfCO5SIk", "hq"),
     title: "JavaScript Mastery",
     tagline: "Variables, functions, arrays, and the browser APIs you use daily.",
-    description: "Learn modern JavaScript from first principles so you can read docs, write logic, and wire up interactive UIs.",
+    description:
+      "Learn modern JavaScript from first principles so you can read docs, write logic, and wire up interactive UIs.",
     level: "Beginner",
     accent: "from-amber-500 to-orange-600",
     hours: 10,
     featured: true,
-    outcomes: ["Write clear functions and modules", "Transform data with arrays and objects", "Handle events and the DOM", "Use async/await with confidence"],
+    outcomes: [
+      "Write clear functions and modules",
+      "Transform data with arrays and objects",
+      "Handle events and the DOM",
+      "Use async/await with confidence",
+    ],
     modules: [
       {
         id: "js-1",
