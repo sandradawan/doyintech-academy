@@ -79,3 +79,14 @@ export function transcriptAsCaptionText(lessonId: string): string {
   if (!t) return "";
   return t.lines.map((l) => (l.t ? `[${l.t}] ${l.text}` : l.text)).join("\n\n");
 }
+
+/** Parse "m:ss" or "mm:ss" or "h:mm:ss" into seconds. */
+export function parseTimestampToSeconds(t?: string): number {
+  if (!t) return 0;
+  const parts = t.trim().split(":").map((p) => Number(p));
+  if (parts.some((n) => Number.isNaN(n))) return 0;
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  if (parts.length === 1) return parts[0];
+  return 0;
+}
