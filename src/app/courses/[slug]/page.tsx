@@ -27,7 +27,7 @@ import {
   type Student,
 } from "@/lib/auth";
 import { QuizPanel } from "@/components/courses/quiz-panel";
-import { LessonContentPanel } from "@/components/courses/lesson-content-panel";
+import { TranscriptPanel } from "@/components/courses/transcript-panel";
 import { VideoPlayer } from "@/components/media/video-player";
 import {
   getNextIncompleteLesson,
@@ -54,7 +54,6 @@ const kindLabel: Record<LessonKind, string> = {
   quiz: "Quiz",
 };
 
-/** DoyinTech playlist + other course trailers */
 const LESSON_VIDEO: Record<string, string> = {
   "wf-1-1": "CTiMiM99wSE",
   "wf-1-2": "u7QxB-woWX0",
@@ -216,8 +215,15 @@ export default function CourseDetailPage() {
               {student ? (busy ? "Enrolling…" : "Enroll for free") : "Sign in to enroll"}
             </button>
             <p className="mt-3 text-xs text-muted">
-              Watch each video (≥90%) to unlock the next. Final quiz unlocks after all videos. Certificate ≥{CERT_PASS_SCORE}% + payment to download.
+              After enroll: watch video (left) + read live caption notes (right) → unlock next → pass quiz (≥{CERT_PASS_SCORE}%) based on the notes → pay → download certificate.
             </p>
+            <ol className="mt-3 space-y-1 text-[11px] text-subtle">
+              <li>1. Register / sign in</li>
+              <li>2. Enroll in the course</li>
+              <li>3. Watch each video fully (notes = transcript)</li>
+              <li>4. Pass the final quiz from those notes</li>
+              <li>5. Pay to download your certificate</li>
+            </ol>
             <ul className="mt-4 space-y-2 text-sm text-muted">
               {course.outcomes.map((o) => (
                 <li key={o} className="flex gap-2">
@@ -359,7 +365,7 @@ export default function CourseDetailPage() {
                 />
               ) : (
                 <>
-                  <div className="grid gap-4 xl:grid-cols-2">
+                  <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
                     <section className="overflow-hidden rounded-xl border border-border bg-surface">
                       <div className="border-b border-border px-3 py-2 text-xs font-semibold tracking-wide text-muted uppercase">
                         Video
@@ -383,26 +389,16 @@ export default function CourseDetailPage() {
                           No video for this lesson.
                         </div>
                       )}
+                      <p className="border-t border-border px-3 py-2 text-[11px] text-subtle">
+                        Watch ≥90% to mark complete and unlock the next video.
+                      </p>
                     </section>
-                    <section className="overflow-hidden rounded-xl border border-border bg-surface">
+
+                    <section className="flex max-h-[min(36rem,70vh)] flex-col overflow-hidden rounded-xl border border-border bg-surface">
                       <div className="border-b border-border px-3 py-2 text-xs font-semibold tracking-wide text-muted uppercase">
-                        Notes
+                        Notes · live caption
                       </div>
-                      <div className="max-h-[28rem] overflow-y-auto p-3 sm:max-h-[32rem]">
-                        <LessonContentPanel
-                          lessonId={active.lesson.id}
-                          courseSlug={slug}
-                          youtubeId={LESSON_VIDEO[active.lesson.id] || null}
-                          onVideoComplete={() => {
-                            if (!enrollment.completedLessons.includes(active.lesson.id)) {
-                              void handleComplete(active.lesson.id);
-                            }
-                          }}
-                        />
-                        <p className="mt-3 text-xs text-subtle">
-                          Watch at least 90% of the video (or to the end) to unlock the next lesson.
-                        </p>
-                      </div>
+                      <TranscriptPanel lessonId={active.lesson.id} className="min-h-0 flex-1 overflow-hidden" />
                     </section>
                   </div>
 
@@ -457,7 +453,7 @@ export default function CourseDetailPage() {
 
           {!allLessonsDone ? (
             <p className="mt-8 text-xs text-subtle">
-              Videos unlock in order. Final quiz opens after Day 5. Certificate requires ≥{CERT_PASS_SCORE}% and payment to download.
+              Flow: watch video → read live caption notes → unlock next → finish all videos → pass quiz (≥{CERT_PASS_SCORE}%) from the notes → pay → download certificate.
             </p>
           ) : null}
         </main>
