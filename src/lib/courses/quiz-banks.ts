@@ -1,6 +1,7 @@
 import type { QuizQuestion } from "@/components/courses/quiz-panel";
+import { resolveCourseQuiz } from "@/lib/courses/quiz-from-notes";
 
-/** Course-specific assessment banks. Web Foundations questions are drawn from video transcript notes. */
+/** Static banks; web-foundations prefers generated quiz from live-caption notes. */
 export const COURSE_QUIZ_BANKS: Record<string, QuizQuestion[]> = {
   "web-foundations": [
     { id: "wf-q1", prompt: "According to Day 1 notes, what does HTML primarily describe?", choices: ["Colors and animation only", "Structure and meaning of a web page", "Server databases", "Git history"], correctIndex: 1 },
@@ -81,5 +82,6 @@ export const COURSE_QUIZ_BANKS: Record<string, QuizQuestion[]> = {
 };
 
 export function getQuizForCourse(courseSlug: string): QuizQuestion[] | null {
-  return COURSE_QUIZ_BANKS[courseSlug] ?? null;
+  const staticBank = COURSE_QUIZ_BANKS[courseSlug] ?? null;
+  return resolveCourseQuiz(courseSlug, staticBank);
 }
