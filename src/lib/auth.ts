@@ -192,59 +192,24 @@ export async function markLessonComplete(courseSlug: string, lessonId: string) {
   return getEnrollment(courseSlug);
 }
 
+/**
+ * Submit course quiz. Certificate issuance is performed exclusively by the
+ * server-side RPC `submit_course_quiz`. No client-side fallback is allowed —
+ * this prevents privilege escalation if RLS is ever misconfigured.
+ */
 export async function completeQuiz(courseSlug: string, score: number) {
   const supabase = createClient() as any;
-  try {
-    const { data, error } = await supabase.rpc("submit_course_quiz", {
-      p_course_slug: courseSlug,
-      p_score: score,
-    });
-    if (!error && data) {
-      const enrollment = await getEnrollment(courseSlug);
-      if (enrollment?.certificateId && score >= 60) {
-        try {
-          const student = await getStudent();
-          if (student?.email) {
-            const { getCourse } = await import("@/lib/courses/catalog");
-            const course = getCourse(courseSlug);
-            notifyEmail("certificate", {
-              email: student.email,
-              name: student.name,
-              courseTitle: course?.title || courseSlug,
-              certificateId: enrollment.certificateId,
-            });
-          }
-        } catch {
-          /* optional */
-        }
-      }
-      return enrollment;
-    }
-  } catch {
-    /* fall through */
+  const { data, error } = await supabase.rpc("submit_course_quiz", {
+    p_course_slug: courseSlug,
+    p_score: score,
+  });
+  if (error) {
+    throw new Error(error.message || "Quiz submission failed");
+  }
+  if (!data) {
+    throw new Error("Quiz submission returned no data");
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return undefined;
-
-  const patch: Record<string, unknown> = { quiz_score: score };
-  if (score >= 60) {
-    const { data: existing } = await supabase
-      .from("enrollments")
-      .select("certificate_id")
-      .eq("user_id", user.id)
-      .eq("course_slug", courseSlug)
-      .maybeSingle();
-    if (!existing?.certificate_id) {
-      const id = `DTA-${courseSlug.slice(0, 3).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-      patch.certificate_id = id;
-      patch.certified_at = new Date().toISOString();
-    }
-  }
-
-  await supabase.from("enrollments").update(patch).eq("user_id", user.id).eq("course_slug", courseSlug);
   const enrollment = await getEnrollment(courseSlug);
   if (enrollment?.certificateId && score >= 60) {
     try {
@@ -267,11 +232,11 @@ export async function completeQuiz(courseSlug: string, score: number) {
             p_href: `/certificates?id=${enrollment.certificateId}`,
           });
         } catch {
-          /* optional */
+          /* optional notification */
         }
       }
     } catch {
-      /* optional */
+      /* email is best-effort */
     }
   }
   return enrollment;
