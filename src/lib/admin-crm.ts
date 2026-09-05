@@ -120,17 +120,12 @@ export async function fetchCrmStudents(): Promise<CrmStudent[]> {
 
 export async function setStudentStatusDb(id: string, status: CrmStudent["status"]) {
   const supabase = sb();
+  // Must go through security-definer RPC — no client-side table update fallback
   const { error } = await supabase.rpc("admin_set_student_status", {
     p_user_id: id,
     p_status: status,
   });
-  if (error) {
-    const { error: e2 } = await supabase
-      .from("profiles")
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq("id", id);
-    if (e2) throw new Error(e2.message);
-  }
+  if (error) throw new Error(error.message);
   await pushActivityDb({ type: "student", message: `Student status set to ${status}`, meta: { studentId: id } });
 }
 
@@ -167,6 +162,7 @@ export async function recordCrmPaymentDb(input: {
   provider: "paystack" | "manual";
 }) {
   const supabase = sb();
+  // Must go through security-definer RPC — no client-side table upsert fallback
   const { data, error } = await supabase.rpc("record_payment", {
     p_reference: input.reference,
     p_email: input.email,
@@ -179,25 +175,7 @@ export async function recordCrmPaymentDb(input: {
     p_currency: input.currency || "NGN",
     p_user_id: input.studentId ?? null,
   });
-  if (error) {
-    const { error: e2 } = await supabase.from("payments").upsert(
-      {
-        reference: input.reference,
-        user_id: input.studentId ?? null,
-        email: input.email.toLowerCase().trim(),
-        course_slug: input.courseSlug,
-        course_title: input.courseTitle ?? null,
-        certificate_id: input.certificateId,
-        amount_kobo: input.amountKobo,
-        currency: input.currency || "NGN",
-        status: input.status,
-        provider: input.provider,
-        paid_at: new Date().toISOString(),
-      },
-      { onConflict: "reference" },
-    );
-    if (e2) throw new Error(e2.message);
-  }
+  if (error) throw new Error(error.message);
   await pushActivityDb({
     type: "payment",
     message: `Payment ${input.status}: ${input.email} · ${input.certificateId}`,
