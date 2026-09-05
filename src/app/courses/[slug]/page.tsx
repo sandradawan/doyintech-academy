@@ -60,6 +60,11 @@ const LESSON_VIDEO: Record<string, string> = {
   "wf-1-3": "uJ7dUicwQOU",
   "wf-2-1": "Um0cfZB9Lmc",
   "wf-2-2": "V2YAF2DrFyY",
+  "wf-3-1": "TLPVp39aS0E",
+  "wf-3-2": "9xBtaGI8uns",
+  "wf-3-3": "1A2nbj1-XBY",
+  "wf-4-1": "CVD8p-Wc-fY",
+  "wf-4-2": "Ts2VHzCyjfY",
   "js-1-1": "W6NZfCO5SIk",
   "js-2-1": "W6NZfCO5SIk",
   "js-3-1": "PoRJizdjiFE",
@@ -220,22 +225,8 @@ export default function CourseDetailPage() {
               {student ? (busy ? "Enrolling…" : "Enroll for free") : "Sign in to enroll"}
             </button>
             <p className="mt-3 text-xs text-muted">
-              After enroll: watch video (left) + voiceover notes (right) → unlock next → pass quiz from notes (≥{CERT_PASS_SCORE}%) → pay → download certificate.
+              Days 1–10 from the DoyinTech playlist. Watch each video (≥90%) to unlock the next. Quiz ≥{CERT_PASS_SCORE}% then pay to download certificate.
             </p>
-            <ol className="mt-3 space-y-1 text-[11px] text-subtle">
-              <li>1. Register / sign in</li>
-              <li>2. Enroll in the course</li>
-              <li>3. Watch each video (voiceover notes on the side)</li>
-              <li>4. Pass the final quiz generated from notes</li>
-              <li>5. Pay to download your certificate</li>
-            </ol>
-            <ul className="mt-4 space-y-2 text-sm text-muted">
-              {course.outcomes.map((o) => (
-                <li key={o} className="flex gap-2">
-                  <Check className="mt-0.5 size-4 shrink-0 text-primary" /> {o}
-                </li>
-              ))}
-            </ul>
           </aside>
         </div>
       </main>
@@ -336,14 +327,6 @@ export default function CourseDetailPage() {
                 );
               })}
             </nav>
-            {allLessonsDone ? (
-              <a
-                href="#final-quiz"
-                className="mt-4 flex items-center gap-2 rounded-md bg-orange/10 px-3 py-2 text-xs font-semibold text-orange"
-              >
-                <ListChecks className="size-3.5" /> Final assessment (≥{CERT_PASS_SCORE}%)
-              </a>
-            ) : null}
           </div>
         </aside>
 
@@ -459,12 +442,6 @@ export default function CourseDetailPage() {
                 title="Final course assessment (from your notes)"
               />
             </div>
-          ) : null}
-
-          {!allLessonsDone ? (
-            <p className="mt-8 text-xs text-subtle">
-              Flow: watch video → read voiceover notes → unlock next → finish videos → quiz from notes (≥{CERT_PASS_SCORE}%) → pay → download certificate.
-            </p>
           ) : null}
         </main>
       </div>
