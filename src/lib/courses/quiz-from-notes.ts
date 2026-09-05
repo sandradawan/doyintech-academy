@@ -36,10 +36,14 @@ const CURATED_FACTS: Fact[] = [
   { lessonId: "wf-1-3", claim: "How many h1 elements should a page typically use?", answer: "One", source: "One h1 for the main topic." },
   { lessonId: "wf-2-1", claim: "Which attribute on an anchor holds the destination URL?", answer: "href", source: "href is the destination." },
   { lessonId: "wf-2-2", claim: "Which list is best when order does not matter?", answer: "ul (unordered list)", source: "ul for unordered lists." },
-  { lessonId: "wf-3-1", claim: "Which elements make a basic HTML table row of cells?", answer: "tr with th or td children", source: "table > tr > th/td." },
-  { lessonId: "wf-3-2", claim: "Why should every form control have a label?", answer: "So users know what to enter and assistive tech can associate the field", source: "Labels improve usability and accessibility." },
-  { lessonId: "wf-3-3", claim: "What does CSS primarily control?", answer: "Presentation: colors, spacing, and layout", source: "CSS is presentation." },
-  { lessonId: "wf-4-2", claim: "In the CSS box model, what is outside the border?", answer: "Margin", source: "Margin is outside the border." },
+  { lessonId: "wf-3-1", claim: "Why should every form control have a label?", answer: "So users know what to enter and assistive tech can associate the field", source: "Labels improve usability and accessibility." },
+  { lessonId: "wf-3-1", claim: "Which attribute on an input adds basic email validation in HTML?", answer: "type=\"email\"", source: "type=email gives basic validation." },
+  { lessonId: "wf-3-2", claim: "Which elements make a basic HTML table row of cells?", answer: "tr with th or td children", source: "table > tr > th/td." },
+  { lessonId: "wf-3-2", claim: "When should you use an HTML table?", answer: "For rows of related data — not full page layout", source: "Tables for data, not layout." },
+  { lessonId: "wf-3-3", claim: "Why prefer semantic tags over only divs?", answer: "They describe meaning for browsers, assistive tech, and SEO", source: "Semantics convey meaning." },
+  { lessonId: "wf-4-1", claim: "What is the difference between id and class attributes?", answer: "id is unique; class can be reused on many elements", source: "id unique, class shared." },
+  { lessonId: "wf-4-1", claim: "When opening a link in a new tab, which rel value improves security?", answer: "noopener", source: "rel=noopener with target=_blank." },
+  { lessonId: "wf-4-2", claim: "What is the Day 10 capstone goal?", answer: "Assemble Days 1–9 into one complete profile page", source: "Capstone combines prior HTML skills." },
 ];
 
 function shuffle<T>(arr: T[], seed: string): T[] {
