@@ -91,6 +91,55 @@ export function markVideoComplete(videoId: string) {
   return saveVideoProgress(videoId, { percent: 100, completed: true });
 }
 
+/**
+ * Pull server-side video progress into localStorage after login.
+ * Server wins when its percent is higher or completed is true.
+ */
+export async function hydrateVideoProgressFromServer(): Promise<number> {
+  if (typeof window === "undefined") return 0;
+  try {
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient() as any;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return 0;
+    const { data, error } = await supabase
+      .from("video_progress")
+      .select("video_id, percent, position, duration, completed, updated_at")
+      .eq("user_id", user.id);
+    if (error || !data?.length) return 0;
+    const all = readAll();
+    let merged = 0;
+    for (const row of data as any[]) {
+      const videoId = row.video_id as string;
+      if (!videoId) continue;
+      const prev = all[videoId];
+      const serverPercent = Math.min(100, Math.max(0, Number(row.percent) || 0));
+      const serverCompleted = Boolean(row.completed) || serverPercent >= 90;
+      if (
+        !prev ||
+        serverPercent > (prev.percent ?? 0) ||
+        (serverCompleted && !prev.completed)
+      ) {
+        all[videoId] = {
+          videoId,
+          percent: Math.max(serverPercent, prev?.percent ?? 0),
+          position: Number(row.position) || prev?.position || 0,
+          duration: Number(row.duration) || prev?.duration || 0,
+          completed: serverCompleted || Boolean(prev?.completed),
+          updatedAt: row.updated_at || new Date().toISOString(),
+        };
+        merged += 1;
+      }
+    }
+    if (merged) writeAll(all);
+    return merged;
+  } catch {
+    return 0;
+  }
+}
+
 export function youtubeThumb(youtubeId: string, quality: "hq" | "mq" | "max" = "hq") {
   const q = quality === "max" ? "maxresdefault" : quality === "mq" ? "mqdefault" : "hqdefault";
   return `https://i.ytimg.com/vi/${youtubeId}/${q}.jpg`;
