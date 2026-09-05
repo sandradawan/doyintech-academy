@@ -1,6 +1,6 @@
 import type { QuizQuestion } from "@/components/courses/quiz-panel";
 
-/** Course-specific assessment banks. Web Foundations questions come from video transcript notes. */
+/** Course-specific assessment banks. Web Foundations questions are drawn from video transcript notes. */
 export const COURSE_QUIZ_BANKS: Record<string, QuizQuestion[]> = {
   "web-foundations": [
     { id: "wf-q1", prompt: "According to Day 1 notes, what does HTML primarily describe?", choices: ["Colors and animation only", "Structure and meaning of a web page", "Server databases", "Git history"], correctIndex: 1 },
