@@ -71,6 +71,8 @@ export function VideoPlayer({
   className,
   thumbnailUrl,
   onComplete,
+  onTimeUpdate,
+  seekToSeconds,
   courseSlug,
   lessonId,
 }: {
@@ -80,6 +82,8 @@ export function VideoPlayer({
   className?: string;
   thumbnailUrl?: string;
   onComplete?: () => void;
+  onTimeUpdate?: (seconds: number, duration: number) => void;
+  seekToSeconds?: number | null;
   courseSlug?: string;
   lessonId?: string;
 }) {
@@ -143,16 +147,20 @@ export function VideoPlayer({
             const YT = window.YT!;
             if (e.data === YT.PlayerState.ENDED) {
               persist(e.target.getDuration(), e.target.getDuration(), true);
+              onTimeUpdate?.(e.target.getDuration(), e.target.getDuration());
             }
             if (e.data === YT.PlayerState.PLAYING) {
               if (pollRef.current) window.clearInterval(pollRef.current);
               pollRef.current = window.setInterval(() => {
                 try {
-                  persist(e.target.getCurrentTime(), e.target.getDuration());
+                  const pos = e.target.getCurrentTime();
+                  const dur = e.target.getDuration();
+                  persist(pos, dur);
+                  onTimeUpdate?.(pos, dur);
                 } catch {
                   /* destroyed */
                 }
-              }, 2000);
+              }, 400);
             }
             if (e.data === YT.PlayerState.PAUSED) {
               if (pollRef.current) {
@@ -160,7 +168,10 @@ export function VideoPlayer({
                 pollRef.current = null;
               }
               try {
-                persist(e.target.getCurrentTime(), e.target.getDuration());
+                const pos = e.target.getCurrentTime();
+                const dur = e.target.getDuration();
+                persist(pos, dur);
+                onTimeUpdate?.(pos, dur);
               } catch {
                 /* ignore */
               }
@@ -180,7 +191,16 @@ export function VideoPlayer({
       }
       playerRef.current = null;
     };
-  }, [active, containerId, persist, videoId, youtubeId]);
+  }, [active, containerId, persist, videoId, youtubeId, onTimeUpdate]);
+
+  useEffect(() => {
+    if (seekToSeconds == null || !playerRef.current) return;
+    try {
+      playerRef.current.seekTo(seekToSeconds, true);
+    } catch {
+      /* ignore */
+    }
+  }, [seekToSeconds]);
 
   const thumb = thumbnailUrl || youtubeThumb(youtubeId, "hq");
   const pct = progress?.percent ?? 0;
