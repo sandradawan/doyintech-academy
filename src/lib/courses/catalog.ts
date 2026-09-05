@@ -33,16 +33,16 @@ export const courses: Course[] = [
     title: "Introduction to Web Development",
     tagline: "DoyinTech playlist Days 1–10 — watch each video fully to unlock the next.",
     description:
-      "Learn web development step by step with DoyinTech (Days 1–10): HTML structure, lists, tables, forms, and CSS basics. Watch each video (≥90%) to unlock the next.",
+      "Learn web development step by step with DoyinTech (Days 1–10): HTML structure, lists, forms, tables, semantic landmarks, attributes, and a capstone profile page. Watch each video (≥90%) to unlock the next.",
     level: "Beginner",
     accent: "from-sky-600 to-cyan-400",
     hours: 3,
     featured: true,
     outcomes: [
       "Write a valid HTML document",
-      "Structure pages with headings, lists, tables, and forms",
-      "Add links, images, and basic CSS",
-      "Understand the CSS box model",
+      "Structure pages with headings, lists, forms, and tables",
+      "Use semantic HTML and attributes correctly",
+      "Assemble a complete profile page from Days 1–9",
     ],
     modules: [
       {
@@ -64,19 +64,19 @@ export const courses: Course[] = [
       },
       {
         id: "wf-3",
-        title: "Tables, forms & CSS start",
+        title: "Forms, tables & semantics",
         lessons: [
-          L("wf-3-1", "Day 6 — Tables", 2, "video", "Watch fully to unlock Day 7."),
-          L("wf-3-2", "Day 7 — Forms & Inputs", 2, "video", "Watch fully to unlock Day 8."),
-          L("wf-3-3", "Day 8 — Introduction to CSS", 2, "video", "Watch fully to unlock Day 9."),
+          L("wf-3-1", "Day 6 — Forms", 2, "video", "Watch fully to unlock Day 7."),
+          L("wf-3-2", "Day 7 — Tables", 2, "video", "Watch fully to unlock Day 8."),
+          L("wf-3-3", "Day 8 — Semantic HTML", 2, "video", "Watch fully to unlock Day 9."),
         ],
       },
       {
         id: "wf-4",
-        title: "Styling & assessment",
+        title: "Attributes, capstone & assessment",
         lessons: [
-          L("wf-4-1", "Day 9 — Colors, Fonts & Text", 2, "video", "Watch fully to unlock Day 10."),
-          L("wf-4-2", "Day 10 — Box Model & Spacing", 2, "video", "Watch fully to unlock the quiz."),
+          L("wf-4-1", "Day 9 — HTML Attributes", 2, "video", "Watch fully to unlock Day 10."),
+          L("wf-4-2", "Day 10 — Capstone Profile Page", 2, "video", "Watch fully to unlock the quiz."),
           L("wf-4-3", "Introduction to Web Development quiz", 12, "quiz", "Pass at 60% toward your certificate."),
         ],
       },
@@ -130,8 +130,15 @@ export const courses: Course[] = [
   },
 ];
 
+/** Alias marketing URLs to canonical slugs. */
+const SLUG_ALIASES: Record<string, string> = {
+  "introduction-to-web-development": "web-foundations",
+  "intro-to-web-development": "web-foundations",
+};
+
 export function getCourse(slug: string): Course | undefined {
-  return courses.find((course) => course.slug === slug);
+  const canonical = SLUG_ALIASES[slug] || slug;
+  return courses.find((course) => course.slug === canonical);
 }
 
 export function featuredCourses(): Course[] {
