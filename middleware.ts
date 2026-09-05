@@ -4,12 +4,18 @@ import { updateSession } from "@/lib/supabase/middleware";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Direct /admin is hidden from the public — use the secret path instead
+  // Never expose the internal /admin routes directly
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  return updateSession(request);
+  // Session refresh for all matched routes
+  const response = await updateSession(request);
+
+  // Defense-in-depth header (also set globally in next.config.ts)
+  response.headers.set("X-Content-Type-Options", "nosniff");
+
+  return response;
 }
 
 export const config = {
