@@ -1,24 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { Captions, Mic } from "lucide-react";
+import { Mic } from "lucide-react";
 import { getTranscript, parseTimestampToSeconds } from "@/lib/courses/transcripts";
 import { cn } from "@/lib/utils";
 
+/**
+ * Written voiceover notes for the video that is playing.
+ * Highlights the current line as the video plays — does NOT seek or control the video.
+ */
 export function TranscriptPanel({
   lessonId,
   className,
   currentTime = 0,
-  onSeek,
 }: {
   lessonId: string;
   className?: string;
   currentTime?: number;
-  onSeek?: (seconds: number) => void;
 }) {
   const transcript = useMemo(() => getTranscript(lessonId), [lessonId]);
   const listRef = useRef<HTMLDivElement>(null);
-  const lineRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const lineRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const timedLines = useMemo(() => {
     if (!transcript) return [];
@@ -33,7 +35,7 @@ export function TranscriptPanel({
     if (!timedLines.length) return -1;
     let idx = 0;
     for (let i = 0; i < timedLines.length; i++) {
-      if (timedLines[i].start <= currentTime + 0.25) idx = i;
+      if (timedLines[i].start <= currentTime + 0.35) idx = i;
       else break;
     }
     return idx;
@@ -42,8 +44,18 @@ export function TranscriptPanel({
   useEffect(() => {
     if (activeIndex < 0) return;
     const el = lineRefs.current[activeIndex];
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (!el || !listRef.current) return;
+    const parent = listRef.current;
+    const elTop = el.offsetTop;
+    const elBottom = elTop + el.offsetHeight;
+    const viewTop = parent.scrollTop;
+    const viewBottom = viewTop + parent.clientHeight;
+    if (elTop < viewTop + 24 || elBottom > viewBottom - 24) {
+      parent.scrollTo({
+        top: Math.max(0, elTop - parent.clientHeight / 3),
+        behavior: "smooth",
+      });
+    }
   }, [activeIndex, lessonId]);
 
   useEffect(() => {
@@ -53,11 +65,9 @@ export function TranscriptPanel({
   if (!transcript) {
     return (
       <div className={cn("p-4 text-sm text-muted", className)}>
-        <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-subtle uppercase">
-          <Captions className="size-3.5" /> Live caption / notes
-        </p>
+        <p className="text-xs font-semibold tracking-wide text-subtle uppercase">Voiceover notes</p>
         <p className="mt-3 text-sm text-muted">
-          Transcript notes for this lesson will appear here as captions while you watch the video.
+          Written voiceover for this video will appear here while you watch.
         </p>
       </div>
     );
@@ -65,12 +75,12 @@ export function TranscriptPanel({
 
   return (
     <div className={cn("flex h-full min-h-0 flex-col", className)}>
-      <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-surface px-3 py-2">
+      <div className="flex items-center gap-2 border-b border-border bg-surface px-3 py-2">
         <Mic className="size-3.5 text-primary" aria-hidden />
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold tracking-wide text-primary uppercase">Voice transcript</p>
+          <p className="text-xs font-semibold tracking-wide text-primary uppercase">Voiceover</p>
           <p className="truncate text-[11px] text-subtle">
-            Auto-scrolls with the video · click a line to jump
+            Written narration of the video · follows playback
           </p>
         </div>
         {currentTime > 0 ? (
@@ -84,19 +94,16 @@ export function TranscriptPanel({
           const isActive = line.index === activeIndex;
           const isPast = line.index < activeIndex;
           return (
-            <button
+            <div
               key={line.index}
-              type="button"
               ref={(el) => {
                 lineRefs.current[line.index] = el;
               }}
-              onClick={() => onSeek?.(line.start)}
               className={cn(
-                "w-full rounded-lg border px-3 py-2.5 text-left transition-all",
-                isActive &&
-                  "border-primary bg-primary/10 shadow-sm ring-1 ring-primary/30",
-                !isActive && isPast && "border-border/60 bg-bg/40 opacity-70",
-                !isActive && !isPast && "border-border/80 bg-bg/80 hover:border-primary/40",
+                "rounded-lg border px-3 py-2.5 transition-colors",
+                isActive && "border-primary/50 bg-primary/10",
+                !isActive && isPast && "border-border/50 bg-bg/50 opacity-75",
+                !isActive && !isPast && "border-border/70 bg-bg/80",
               )}
             >
               {line.t ? (
@@ -112,16 +119,16 @@ export function TranscriptPanel({
               <span
                 className={cn(
                   "text-sm leading-relaxed",
-                  isActive ? "text-fg font-medium" : "text-fg/85",
+                  isActive ? "font-medium text-fg" : "text-fg/90",
                 )}
               >
                 {line.text}
               </span>
-            </button>
+            </div>
           );
         })}
         <p className="pt-2 text-[11px] text-subtle">
-          Final quiz questions are generated from these notes after you finish the videos.
+          This is the written voiceover of the video. Your final quiz is based on these notes.
         </p>
       </div>
     </div>

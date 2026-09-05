@@ -72,7 +72,6 @@ export function VideoPlayer({
   thumbnailUrl,
   onComplete,
   onTimeUpdate,
-  seekToSeconds,
   courseSlug,
   lessonId,
 }: {
@@ -82,8 +81,8 @@ export function VideoPlayer({
   className?: string;
   thumbnailUrl?: string;
   onComplete?: () => void;
+  /** Optional — does not recreate the player (stored in a ref) */
   onTimeUpdate?: (seconds: number, duration: number) => void;
-  seekToSeconds?: number | null;
   courseSlug?: string;
   lessonId?: string;
 }) {
@@ -91,9 +90,18 @@ export function VideoPlayer({
   const containerId = `yt-${reactId}`;
   const playerRef = useRef<YTPlayer | null>(null);
   const pollRef = useRef<number | null>(null);
+  const onTimeUpdateRef = useRef(onTimeUpdate);
+  const onCompleteRef = useRef(onComplete);
   const [active, setActive] = useState(false);
   const [progress, setProgress] = useState<VideoProgressRecord | null>(null);
   const completedRef = useRef(false);
+
+  useEffect(() => {
+    onTimeUpdateRef.current = onTimeUpdate;
+  }, [onTimeUpdate]);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     setProgress(getVideoProgress(videoId));
@@ -117,10 +125,10 @@ export function VideoPlayer({
       setProgress(rec);
       if (rec.completed && !completedRef.current) {
         completedRef.current = true;
-        onComplete?.();
+        onCompleteRef.current?.();
       }
     },
-    [videoId, onComplete, courseSlug, lessonId],
+    [videoId, courseSlug, lessonId],
   );
 
   useEffect(() => {
@@ -146,8 +154,9 @@ export function VideoPlayer({
           onStateChange: (e) => {
             const YT = window.YT!;
             if (e.data === YT.PlayerState.ENDED) {
-              persist(e.target.getDuration(), e.target.getDuration(), true);
-              onTimeUpdate?.(e.target.getDuration(), e.target.getDuration());
+              const dur = e.target.getDuration();
+              persist(dur, dur, true);
+              onTimeUpdateRef.current?.(dur, dur);
             }
             if (e.data === YT.PlayerState.PLAYING) {
               if (pollRef.current) window.clearInterval(pollRef.current);
@@ -156,11 +165,11 @@ export function VideoPlayer({
                   const pos = e.target.getCurrentTime();
                   const dur = e.target.getDuration();
                   persist(pos, dur);
-                  onTimeUpdate?.(pos, dur);
+                  onTimeUpdateRef.current?.(pos, dur);
                 } catch {
                   /* destroyed */
                 }
-              }, 400);
+              }, 500);
             }
             if (e.data === YT.PlayerState.PAUSED) {
               if (pollRef.current) {
@@ -171,7 +180,7 @@ export function VideoPlayer({
                 const pos = e.target.getCurrentTime();
                 const dur = e.target.getDuration();
                 persist(pos, dur);
-                onTimeUpdate?.(pos, dur);
+                onTimeUpdateRef.current?.(pos, dur);
               } catch {
                 /* ignore */
               }
@@ -191,16 +200,7 @@ export function VideoPlayer({
       }
       playerRef.current = null;
     };
-  }, [active, containerId, persist, videoId, youtubeId, onTimeUpdate]);
-
-  useEffect(() => {
-    if (seekToSeconds == null || !playerRef.current) return;
-    try {
-      playerRef.current.seekTo(seekToSeconds, true);
-    } catch {
-      /* ignore */
-    }
-  }, [seekToSeconds]);
+  }, [active, containerId, persist, videoId, youtubeId]);
 
   const thumb = thumbnailUrl || youtubeThumb(youtubeId, "hq");
   const pct = progress?.percent ?? 0;
