@@ -76,7 +76,6 @@ export default function CourseDetailPage() {
   const [busy, setBusy] = useState(false);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [videoTime, setVideoTime] = useState(0);
-  const [seekTo, setSeekTo] = useState<number | null>(null);
 
   useEffect(() => {
     const lesson = searchParams.get("lesson");
@@ -85,7 +84,6 @@ export default function CourseDetailPage() {
 
   useEffect(() => {
     setVideoTime(0);
-    setSeekTo(null);
   }, [activeLessonId]);
 
   useEffect(() => {
@@ -222,12 +220,12 @@ export default function CourseDetailPage() {
               {student ? (busy ? "Enrolling…" : "Enroll for free") : "Sign in to enroll"}
             </button>
             <p className="mt-3 text-xs text-muted">
-              After enroll: watch video (left) + live caption notes (right) → unlock next → pass quiz from notes (≥{CERT_PASS_SCORE}%) → pay → download certificate.
+              After enroll: watch video (left) + voiceover notes (right) → unlock next → pass quiz from notes (≥{CERT_PASS_SCORE}%) → pay → download certificate.
             </p>
             <ol className="mt-3 space-y-1 text-[11px] text-subtle">
               <li>1. Register / sign in</li>
               <li>2. Enroll in the course</li>
-              <li>3. Watch each video (notes auto-scroll)</li>
+              <li>3. Watch each video (voiceover notes on the side)</li>
               <li>4. Pass the final quiz generated from notes</li>
               <li>5. Pay to download your certificate</li>
             </ol>
@@ -386,7 +384,6 @@ export default function CourseDetailPage() {
                           courseSlug={slug}
                           lessonId={active.lesson.id}
                           onTimeUpdate={(sec) => setVideoTime(sec)}
-                          seekToSeconds={seekTo}
                           onComplete={() => {
                             if (!enrollment.completedLessons.includes(active.lesson.id)) {
                               void handleComplete(active.lesson.id);
@@ -405,19 +402,12 @@ export default function CourseDetailPage() {
 
                     <section className="flex max-h-[min(36rem,70vh)] flex-col overflow-hidden rounded-xl border border-border bg-surface">
                       <div className="border-b border-border px-3 py-2 text-xs font-semibold tracking-wide text-muted uppercase">
-                        Notes · live caption
+                        Voiceover notes
                       </div>
                       <TranscriptPanel
                         lessonId={active.lesson.id}
                         className="min-h-0 flex-1 overflow-hidden"
                         currentTime={videoTime}
-                        onSeek={(sec) => {
-                          setSeekTo(null);
-                          requestAnimationFrame(() => {
-                            setSeekTo(sec);
-                            setVideoTime(sec);
-                          });
-                        }}
                       />
                     </section>
                   </div>
@@ -473,7 +463,7 @@ export default function CourseDetailPage() {
 
           {!allLessonsDone ? (
             <p className="mt-8 text-xs text-subtle">
-              Flow: watch video → captions auto-scroll → unlock next → finish videos → quiz from notes (≥{CERT_PASS_SCORE}%) → pay → download certificate.
+              Flow: watch video → read voiceover notes → unlock next → finish videos → quiz from notes (≥{CERT_PASS_SCORE}%) → pay → download certificate.
             </p>
           ) : null}
         </main>
