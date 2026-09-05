@@ -34,10 +34,25 @@ update public.profiles set role = 'admin' where email = 'you@example.com';
 Never share admin credentials. Prefer individual accounts + MFA.
 
 ## 7. RLS checklist (critical)
-- Students may only read/update their own `profiles`, `enrollments`, `lesson_progress`, `quiz_attempts`.
-- Only security-definer RPCs may issue certificates or change payment status.
-- Admin-only tables (`admin_activity`, full student lists, content overrides) must require `role = 'admin'`.
+- Students may only read/update their own `profiles`, `lesson_progress`, `quiz_attempts`.
+- Students may **SELECT** enrollments but **not UPDATE** them (blocks forged `quiz_score` / `certificate_id`).
+- Signup always creates `role = 'student'` — never trust `raw_user_meta_data.role`.
+- Profile trigger blocks non-admin changes to `role` / `status`.
+- Payments: no direct INSERT for clients; `record_payment` allows **service_role or admin only**.
+- Only security-definer RPCs may issue certificates (`submit_course_quiz`).
+- Admin-only tables (`admin_activity`, full student lists, content overrides) require `role = 'admin'`.
 - Review every `SECURITY DEFINER` function for `auth.uid()` / role checks.
+
+## 7b. P0 security migration (existing projects)
+SQL Editor → run the full file:
+
+`supabase/migrations/20260905000000_p0_security_hardening.sql`
+
+Then promote admin:
+
+```sql
+update public.profiles set role = 'admin' where email = 'you@example.com';
+```
 
 ## 8. Run
 ```bash
